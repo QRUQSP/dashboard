@@ -1,0 +1,54 @@
+@import url("fa/css/all.min.css");
+
+html, body, div, span, 
+table, thead, tbody, tr, td, th, 
+h1, h2, h3, h4, h5, h6, 
+p, blockquote, pre, b, u, i,
+dl, dt, dd, ol, ul, li,
+form, label, legend, article, aside, canvas, details, 
+embed, header, hgroup, footer, menu, nav, section, summary,
+audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    box-sizing: border-box;
+}
+a, a:active, a:hover, a:focus {
+    color: #fff;
+}
+html {
+    margin: 0px;
+    border: 0px;
+    padding: 0px;
+    overflow: hidden;
+}
+body {
+    margin: 0px;
+    border: 0px;
+    padding: 0px;
+    background: #9ec6f3;
+    background: #000;
+    width: 100%;
+    height: 100%;
+    color: #fff;
+}
+.hidden {
+    display: none;
+}
+.alignmiddle {
+    text-align: center;
+    vertical-align: middle;
+}
+div.nopanels {
+    width: 100%;
+    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    text-align: center;
+    vertical-align: middle;
+    display: table-cell;
+    font-size: 3em;
+}

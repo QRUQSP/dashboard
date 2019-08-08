@@ -1,0 +1,39 @@
+#
+# Description
+# -----------
+# This table store the dashboards for a tenant. This allows the tenant
+# to setup multiple dashboard for different purposes.
+#
+# Fields
+# ------
+# id:                       The ID assigned to the record.
+# uuid:                     The Universal Unique ID.
+# tnid:                     The Tenant ID the record belongs to.
+#
+# name:                     The name for the dashboard.
+# permalink:                The permalink for the dashboard.
+# theme:                    The theme for the dashboard. **future**
+#
+# password:                 The password for the dashboard **future**.
+#
+# settings:                 The settings for the dashboard, refresh times, panel switch time,etc.
+#
+# date_added:               The UTC date and time the record was added.
+# last_updated:             The UTC date and time the record was last update.
+#
+create table qruqsp_dashboards (
+    id int not null auto_increment,
+    uuid char(36) not null,
+    tnid int not null,
+    name varchar(250) not null,
+    permalink varchar(250) not null,
+    theme varchar(150) not null,
+    password varchar(150) not null,
+    settings text not null,
+    date_added datetime not null,
+    last_updated datetime not null,
+    primary key (id),
+    unique index (uuid),
+    unique index (tnid, permalink),
+    index sync (tnid, uuid, last_updated)
+) ENGINE='InnoDB', COMMENT='v1.01';
