@@ -61,7 +61,8 @@ function qruqsp_dashboard_panelGet($ciniki) {
             'title'=>'',
             'sequence'=>'',
             'panel_ref'=>'',
-            'settings'=>'',
+            'settings'=>array(
+                ),
         );
     }
 
@@ -81,7 +82,7 @@ function qruqsp_dashboard_panelGet($ciniki) {
         ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
         $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.dashboard', array(
             array('container'=>'panels', 'fname'=>'id', 
-                'fields'=>array('panel_title'=>'title', 'panel_sequence'=>'sequence', 'panel_ref', 'settings'),
+                'fields'=>array('title', 'sequence', 'panel_ref', 'settings'),
                 ),
             ));
         if( $rc['stat'] != 'ok' ) {
@@ -112,6 +113,14 @@ function qruqsp_dashboard_panelGet($ciniki) {
                 $rsp['panels'] = array_merge($rsp['panels'], $rc['panels']);
             }
         }
+    }
+    
+    //
+    // Set the default panel as the first one in the list
+    //
+    if( $args['panel_id'] == 0 ) {
+        reset($rsp['panels']);
+        $rsp['panel']['panel_ref'] = key($rsp['panels']);
     }
 
 

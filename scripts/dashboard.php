@@ -135,6 +135,14 @@ if( $rc['stat'] != 'ok' ) {
 }
 
 //
+// Check the type of device
+//
+$ciniki['remote_device'] = 'generic';
+if( isset($_SERVER['HTTP_USER_AGENT']) && strstr($_SERVER['HTTP_USER_AGENT'], 'iPad; CPU OS 5') !== false ) {
+    $ciniki['remote_device'] = 'ipad1';
+}
+
+//
 // Check if being run under sub directory
 //
 if( isset($args['path'][0]) && $args['path'][0] == 'dashboard' ) {

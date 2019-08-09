@@ -76,7 +76,7 @@ function qruqsp_dashboard_main() {
         'panels':{'label':'Panels', 'type':'simplegrid', 'num_cols':1,
             'noData':'No panels added',
             'addTxt':'Add Panel',
-            'addFn':'M.qruqsp_dashboard_main.panel.open(\'M.qruqsp_dashboard_main.dashboard.open();\',0,null);'
+            'addFn':'M.qruqsp_dashboard_main.dashboard.save("M.qruqsp_dashboard_main.panel.open(\'M.qruqsp_dashboard_main.dashboard.open();\',0,null);");',
             },
         '_buttons':{'label':'', 'buttons':{
             'save':{'label':'Save', 'fn':'M.qruqsp_dashboard_main.dashboard.save();'},
@@ -179,8 +179,8 @@ function qruqsp_dashboard_main() {
     this.panel.nplist = [];
     this.panel.sections = {
         'general':{'label':'', 'fields':{
-            'panel_title':{'label':'Title', 'required':'yes', 'type':'text'},
-            'panel_sequence':{'label':'Order', 'type':'text'},
+            'title':{'label':'Title', 'required':'yes', 'type':'text'},
+            'sequence':{'label':'Order', 'type':'text'},
             }},
         '_panel':{'label':'Choose the panel template', 'fields':{
             'panel_ref':{'label':'', 'hidelabel':'yes', 'required':'yes', 'type':'select', 
@@ -207,18 +207,22 @@ function qruqsp_dashboard_main() {
         return {'method':'qruqsp.dashboard.panelHistory', 'args':{'tnid':M.curTenantID, 'panel_id':this.panel_id, 'field':i}};
     }
     this.panel.updateModuleOptions = function() {
-        console.log('set options');
         this.setModuleOptions(this.formValue('panel_ref'));
     }
     this.panel.setModuleOptions = function(option) {
         this.sections._panel_options.fields = {};
         if( this.panels[option] != null && this.panels[option].options != null ) {
-            this.sections._panel_options.fields = this.panels[option].options;
             this.sections._panel_options.visible = 'yes';
+            this.sections._panel_options.fields = this.panels[option].options;
         } else {
             this.sections._panel_options.visible = 'hidden';
         }
         this.refreshSection('_panel_options');
+    }
+    this.panel.refreshFields = function(fields) {
+        for(var i in fields) {
+            this.showHideFormField('_panel_options', fields[i]);
+        }
     }
     this.panel.open = function(cb, pid, list) {
         if( pid != null ) { this.panel_id = pid; }
@@ -232,12 +236,30 @@ function qruqsp_dashboard_main() {
             p.data = rsp.panel;
             p.sections._panel.fields.panel_ref.options = [];
             for(var i in rsp.panels) {
-                p.sections._panel.fields.panel_ref.options[rsp.panels[i].value] = rsp.panels[i].name;
+                p.sections._panel.fields.panel_ref.options[i] = rsp.panels[i].name;
+                for(var j in rsp.panels[i].options) {
+                    if( rsp.panels[i].options[j].vfield != null && rsp.panels[i].options[j].vshow != null ) {
+                        rsp.panels[i].options[j].visible = function() {
+                            var p = M.qruqsp_dashboard_main.panel;
+                            var v = p.formValue(this.vfield);
+                            if( v == null && p.data.settings[this.vfield] != null ) {
+                                v = p.data.settings[this.vfield];
+                            }
+                            if( v == null && this.vdefault != null ) {
+                                return this.vdefault;
+                            }
+                            if( this.vshow.includes(v) ) {
+                                return 'yes';
+                            }
+                            return 'no';
+                        };
+                    }
+                }
             }
             p.panels = rsp.panels;
-            p.setModuleOptions(p.data.panel_ref);
             p.refresh();
             p.show(cb);
+            p.setModuleOptions(p.data.panel_ref);
         });
     }
     this.panel.save = function(cb) {
@@ -258,7 +280,7 @@ function qruqsp_dashboard_main() {
             }
         } else {
             var c = this.serializeForm('yes');
-            M.api.postJSONCb('qruqsp.dashboard.panelAdd', {'tnid':M.curTenantID, 'dashboard_id':this.dashboard_id}, c, function(rsp) {
+            M.api.postJSONCb('qruqsp.dashboard.panelAdd', {'tnid':M.curTenantID, 'dashboard_id':M.qruqsp_dashboard_main.dashboard.dashboard_id}, c, function(rsp) {
                 if( rsp.stat != 'ok' ) {
                     M.api.err(rsp);
                     return false;

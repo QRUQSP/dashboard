@@ -20,20 +20,15 @@ function qruqsp_dashboard_panelAdd(&$ciniki) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'prepareArgs');
     $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
-        'panel_title'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Title'),
-        'panel_sequence'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Order'),
+        'dashboard_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Dashboard'),
+        'title'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Title'),
+        'sequence'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Order'),
         'panel_ref'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Panel'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
     $args = $rc['args'];
-    if( isset($args['panel_title']) ) {
-        $args['title'] = $args['panel_title'];
-    }
-    if( isset($args['panel_sequence']) ) {
-        $args['title'] = $args['panel_sequence'];
-    }
 
     //
     // Check access to tnid as owner

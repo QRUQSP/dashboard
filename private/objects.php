@@ -39,6 +39,7 @@ function qruqsp_dashboard_objects(&$ciniki) {
         'o_container' => 'panels',
         'table' => 'qruqsp_dashboard_panels',
         'fields' => array(
+            'dashboard_id' => array('name'=>'Dashboard'),
             'title' => array('name'=>'Title'),
             'sequence' => array('name'=>'Order', 'default'=>''),
             'panel_ref' => array('name'=>'Panel'),

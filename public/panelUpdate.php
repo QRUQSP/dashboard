@@ -17,20 +17,14 @@ function qruqsp_dashboard_panelUpdate(&$ciniki) {
     $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'panel_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Panel'),
-        'panel_title'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Title'),
-        'panel_sequence'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Order'),
+        'title'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Title'),
+        'sequence'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Order'),
         'panel_ref'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Panel'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
     $args = $rc['args'];
-    if( isset($args['panel_title']) ) {
-        $args['title'] = $args['panel_title'];
-    }
-    if( isset($args['panel_sequence']) ) {
-        $args['title'] = $args['panel_sequence'];
-    }
 
     //
     // Make sure this module is activated, and
@@ -87,7 +81,7 @@ function qruqsp_dashboard_panelUpdate(&$ciniki) {
         foreach($panel['options'] as $oid => $option) {
             if( isset($ciniki['request']['args'][$oid]) ) {
                 $settings[$oid] = $ciniki['request']['args'][$oid];
-            } elseif( $existing_settings[$oid] ) {
+            } elseif( isset($existing_settings[$oid]) ) {
                 $settings[$oid] = $existing_settings[$oid];
             }
         }

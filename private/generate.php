@@ -93,36 +93,8 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
         $dashboard['panels'][$pid]['css'] = '';
         $dashboard['panels'][$pid]['js'] = '';
         $dashboard['panels'][$pid]['data'] = array();
-
     }
 
-/*$dashboard = array(
-    'name' => 'iPad',
-    'permalink' => 'ipad',
-    'theme' => 'default',
-    'panels' => array(
-        array(
-            'id' => 3,
-            'title' => 'Indoor/Outdoor',
-            'sequence' => 1,
-            'ref' => 'qruqsp.weather.twinTempOrbits',
-            'settings' => array(
-                'o1name' => 'Indoor',
-                'o1t' => 15,
-                'o1h' => 15,
-                'o2name' => 'Outdoor',
-                'o2t' => 4,
-                'o2h' => 4,
-                ),
-            'content' => '',
-            'css' => '',
-            'js' => array(),
-            'data' => array(),
-            ),
-        ),
-    );
-*/
-//error_log(print_r($dashboard, true));
     //
     // Setup databoard settings
     //
@@ -270,7 +242,12 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
 
     $css .= "</style>\n";
     $js_panel_sequence .= '];';
-    $js = "<script type='text/javascript'>var url='/dashboard'; var db_panels = " . json_encode($js_panels) . ";" . $js_panel_sequence . $js . "</script>";
+    $js = "<script type='text/javascript'>"
+        . "var url='/dashboard" . ($permalink != '' ? '/' . $permalink : '') . "'; "
+        . "var db_panels = " . json_encode($js_panels) . ";" 
+        . $js_panel_sequence 
+        . $js 
+        . "</script>";
     //
     // Dashboard must be included after db_panel array is setup
     //
