@@ -73,10 +73,48 @@ function qruqsp_dashboard_main() {
 //            'theme':{'label':'Theme', 'type':'text'},
 //            'password':{'label':'Password', 'type':'text'},
             }},
+        'slideshow':{'label':'Panel Advance',
+            'visible':function() { return M.qruqsp_dashboard_main.dashboard.data.panels != null && M.qruqsp_dashboard_main.dashboard.data.panels.length > 1 ? 'yes' : 'no'; },
+            'fields':{
+                'slideshow-mode':{'label':'Advance Mode', 'type':'select', 
+                    'options':{'auto':'Automatic', 'manual':'Manual'},
+                    'onchange':'M.qruqsp_dashboard_main.dashboard.updateSlideshow();',
+                    },
+                'slideshow-delay-seconds':{'label':'Panel Display Time', 'required':'no', 'type':'select', 
+                    'visible':'no',
+                    'options':{
+                        '5':'5 Seconds',
+                        '10':'10 Seconds',
+                        '15':'15 Seconds',
+                        '20':'20 Seconds',
+                        '30':'30 Seconds',
+                        '60':'1 Minute',
+                        '120':'2 Minutes',
+                        '300':'5 Minutes',
+                        '600':'10 Minutes',
+                        '900':'15 Minutes',
+                        '1200':'20 Minutes',
+                        '1800':'30 Minutes',
+                    }},
+                'slideshow-reset-seconds':{'label':'Reset to 1st panel after', 'required':'no', 'type':'select', 
+                    'visible':'no',
+                    'options':{
+                        '0':'No Reset',
+                        '15':'15 Seconds',
+                        '20':'20 Seconds',
+                        '30':'30 Seconds',
+                        '60':'1 Minute',
+                        '300':'5 Minutes',
+                        '600':'10 Minutes',
+                        '900':'15 Minutes',
+                        '1200':'20 Minutes',
+                        '1800':'30 Minutes',
+                    }},
+            }},
         'panels':{'label':'Panels', 'type':'simplegrid', 'num_cols':1,
             'noData':'No panels added',
             'addTxt':'Add Panel',
-            'addFn':'M.qruqsp_dashboard_main.dashboard.save("M.qruqsp_dashboard_main.panel.open(\'M.qruqsp_dashboard_main.dashboard.open();\',0,null);");',
+            'addFn':'M.qruqsp_dashboard_main.dashboard.save("M.qruqsp_dashboard_main.panel.open(\'M.qruqsp_dashboard_main.dashboard.open();\',0,M.qruqsp_dashboard_main.dashboard.dashboard_id,null);");',
             },
         '_buttons':{'label':'', 'buttons':{
             'save':{'label':'Save', 'fn':'M.qruqsp_dashboard_main.dashboard.save();'},
@@ -97,7 +135,18 @@ function qruqsp_dashboard_main() {
         }
     }
     this.dashboard.rowFn = function(s, i, d) {
-        return 'M.qruqsp_dashboard_main.panel.open(\'M.qruqsp_dashboard_main.dashboard.open();\',' + d.id + ',null);';
+        return 'M.qruqsp_dashboard_main.panel.open(\'M.qruqsp_dashboard_main.dashboard.open();\',' + d.id + ',M.qruqsp_dashboard_main.dashboard.dashboard_id,null);';
+    }
+    this.dashboard.updateSlideshow = function() {
+        if( this.formValue('slideshow-mode') == 'manual' ) {
+            this.sections.slideshow.fields['slideshow-delay-seconds'].visible = 'no';
+            this.sections.slideshow.fields['slideshow-reset-seconds'].visible = 'yes';
+        } else {
+            this.sections.slideshow.fields['slideshow-delay-seconds'].visible = 'yes';
+            this.sections.slideshow.fields['slideshow-reset-seconds'].visible = 'no';
+        }
+        this.showHideFormField('slideshow', 'slideshow-delay-seconds');
+        this.showHideFormField('slideshow', 'slideshow-reset-seconds');
     }
     this.dashboard.open = function(cb, did, list) {
         if( did != null ) { this.dashboard_id = did; }
@@ -109,6 +158,13 @@ function qruqsp_dashboard_main() {
             }
             var p = M.qruqsp_dashboard_main.dashboard;
             p.data = rsp.dashboard;
+            if( rsp.dashboard['slideshow-mode'] != null && rsp.dashboard['slideshow-mode'] == 'manual' ) {
+                p.sections.slideshow.fields['slideshow-delay-seconds'].visible = 'no';
+                p.sections.slideshow.fields['slideshow-reset-seconds'].visible = 'yes';
+            } else {
+                p.sections.slideshow.fields['slideshow-delay-seconds'].visible = 'yes';
+                p.sections.slideshow.fields['slideshow-reset-seconds'].visible = 'no';
+            }
             p.refresh();
             p.show(cb);
         });
@@ -176,6 +232,7 @@ function qruqsp_dashboard_main() {
     this.panel.data = null;
     this.panel.panels = null;
     this.panel.panel_id = 0;
+    this.panel.dashboard_id = 0;
     this.panel.nplist = [];
     this.panel.sections = {
         'general':{'label':'', 'fields':{
@@ -224,10 +281,11 @@ function qruqsp_dashboard_main() {
             this.showHideFormField('_panel_options', fields[i]);
         }
     }
-    this.panel.open = function(cb, pid, list) {
+    this.panel.open = function(cb, pid, did, list) {
         if( pid != null ) { this.panel_id = pid; }
+        if( did != null ) { this.dashboard_id = did; }
         if( list != null ) { this.nplist = list; }
-        M.api.getJSONCb('qruqsp.dashboard.panelGet', {'tnid':M.curTenantID, 'panel_id':this.panel_id}, function(rsp) {
+        M.api.getJSONCb('qruqsp.dashboard.panelGet', {'tnid':M.curTenantID, 'panel_id':this.panel_id, 'dashboard_id':this.dashboard_id}, function(rsp) {
             if( rsp.stat != 'ok' ) {
                 M.api.err(rsp);
                 return false;
@@ -280,7 +338,7 @@ function qruqsp_dashboard_main() {
             }
         } else {
             var c = this.serializeForm('yes');
-            M.api.postJSONCb('qruqsp.dashboard.panelAdd', {'tnid':M.curTenantID, 'dashboard_id':M.qruqsp_dashboard_main.dashboard.dashboard_id}, c, function(rsp) {
+            M.api.postJSONCb('qruqsp.dashboard.panelAdd', {'tnid':M.curTenantID, 'dashboard_id':this.dashboard_id}, c, function(rsp) {
                 if( rsp.stat != 'ok' ) {
                     M.api.err(rsp);
                     return false;

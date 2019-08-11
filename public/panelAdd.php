@@ -45,15 +45,15 @@ function qruqsp_dashboard_panelAdd(&$ciniki) {
     list($package, $module, $panel) = explode('.', $args['panel_ref']);
     $rc = ciniki_core_loadMethod($ciniki, $package, $module, 'hooks', 'dashboardPanels');
     if( $rc['stat'] != 'ok' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.10', 'msg'=>'Unable to load panel', 'err'=>$rc['err']));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.30', 'msg'=>'Unable to load panel', 'err'=>$rc['err']));
     }
     $fn = $rc['function_call'];
     $rc = $fn($ciniki, $args['tnid'], array());
     if( $rc['stat'] != 'ok' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.16', 'msg'=>'Unable to load panel', 'err'=>$rc['err']));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.33', 'msg'=>'Unable to load panel', 'err'=>$rc['err']));
     }
     if( !isset($rc['panels'][$args['panel_ref']]) ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.16', 'msg'=>'Invalid panel'));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.33', 'msg'=>'Invalid panel'));
     }
     $panel = $rc['panels'][$args['panel_ref']];
 

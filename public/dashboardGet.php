@@ -62,6 +62,9 @@ function qruqsp_dashboard_dashboardGet($ciniki) {
             'permalink'=>'',
             'theme'=>'default',
             'password'=>'',
+            'slideshow-mode'=>'auto',
+            'slideshow-delay-seconds'=>'60',
+            'slideshow-reset-seconds'=>'60',
         );
     }
 
@@ -92,6 +95,13 @@ function qruqsp_dashboard_dashboardGet($ciniki) {
             return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.15', 'msg'=>'Unable to find Dashboards'));
         }
         $dashboard = $rc['dashboards'][0];
+        if( $rc['dashboards'][0]['settings'] != '' ) {
+            $settings = unserialize($rc['dashboards'][0]['settings']);
+            foreach($settings as $k => $v) {    
+                $dashboard[$k] = $v;
+            }
+        }
+        unset($dashboard['settings']);
 
         //
         // Get the list of panels

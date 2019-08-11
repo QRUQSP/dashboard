@@ -66,10 +66,10 @@ function qruqsp_dashboard_panelUpdate(&$ciniki) {
     $fn = $rc['function_call'];
     $rc = $fn($ciniki, $args['tnid'], array());
     if( $rc['stat'] != 'ok' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.16', 'msg'=>'Unable to load panel', 'err'=>$rc['err']));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.31', 'msg'=>'Unable to load panel', 'err'=>$rc['err']));
     }
     if( !isset($rc['panels'][$panel_ref]) ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.16', 'msg'=>'Invalid panel'));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.31', 'msg'=>'Invalid panel'));
     }
     $panel = $rc['panels'][$panel_ref];
 

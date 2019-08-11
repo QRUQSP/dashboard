@@ -24,7 +24,6 @@ function qruqsp_dashboard_dashboardAdd(&$ciniki) {
         'permalink'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Permalink'),
         'theme'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Theme'),
         'password'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Password'),
-        'settings'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Settings'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
@@ -47,6 +46,21 @@ function qruqsp_dashboard_dashboardAdd(&$ciniki) {
         ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'makePermalink');
         $args['permalink'] = ciniki_core_makePermalink($ciniki, $args['name']);
     }
+    
+    //
+    // Check for settings
+    //
+    $new_settings = array(
+        'slideshow-mode' => 'auto',
+        'slideshow-delay-seconds' => 60,
+        'slideshow-reset-seconds' => 60,
+        );
+    foreach($new_settings as $setting) {
+        if( isset($ciniki['request']['args'][$setting]) ) {
+            $new_settings[$setting] = $ciniki['request']['args'][$setting];
+        }
+    }
+    $args['settings'] = serialize($new_settings);
 
     //
     // Make sure the permalink is unique

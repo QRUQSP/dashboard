@@ -21,7 +21,6 @@ function qruqsp_dashboard_dashboardUpdate(&$ciniki) {
         'permalink'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Permalink'),
         'theme'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Theme'),
         'password'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Password'),
-        'settings'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Settings'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
@@ -57,6 +56,49 @@ function qruqsp_dashboard_dashboardUpdate(&$ciniki) {
         if( $rc['num_rows'] > 0 ) {
             return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.28', 'msg'=>'You already have an dashboards with this name, please choose another.'));
         }
+    }
+
+    //
+    // Check for settings
+    //
+    $strsql = "SELECT id, settings "
+        . "FROM qruqsp_dashboards "
+        . "WHERE id = '" . ciniki_core_dbQuote($ciniki, $args['dashboard_id']) . "' "
+        . "AND tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+        . "";
+    $rc = ciniki_core_dbHashQuery($ciniki, $strsql, 'qruqsp.dashboard', 'dashboard');
+    if( $rc['stat'] != 'ok' ) {
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.25', 'msg'=>'Unable to load dashboard', 'err'=>$rc['err']));
+    }
+    if( !isset($rc['dashboard']) ) {
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.26', 'msg'=>'Unable to find requested dashboard'));
+    }
+    $dashboard = $rc['dashboard'];
+    
+    $settings = unserialize($dashboard['settings']);
+    // Array of allowed settings and default values
+    $new_settings = $settings;
+    $allowed_settings = array(
+        'slideshow-mode' => 'auto',
+        'slideshow-delay-seconds' => 60,
+        'slideshow-reset-seconds' => 60,
+        );
+    $update_settings = 'no';
+    foreach($allowed_settings as $setting => $default) {
+        // Set with new value
+        if( isset($ciniki['request']['args'][$setting]) ) {
+            $new_settings[$setting] = $ciniki['request']['args'][$setting];
+            $update_settings = 'yes';
+        }
+        // Add default if missing
+        if( !isset($new_settings[$setting]) ) {
+            $new_settings[$setting] = $default;
+            $update_settings = 'yes';
+        }
+    }
+
+    if( $update_settings == 'yes' ) {
+        $args['settings'] = serialize($new_settings);
     }
 
     //

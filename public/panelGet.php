@@ -22,6 +22,7 @@ function qruqsp_dashboard_panelGet($ciniki) {
     $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'panel_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Panel'),
+        'dashboard_id'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Dashboard'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
@@ -57,9 +58,26 @@ function qruqsp_dashboard_panelGet($ciniki) {
     // Return default for new Panel
     //
     if( $args['panel_id'] == 0 ) {
+        $seq = 1;
+        if( isset($args['dashboard_id']) && $args['dashboard_id'] > 0 ) {
+            //
+            // Get the next sequence number
+            //
+            $strsql = "SELECT MAX(sequence) AS num "
+                . "FROM qruqsp_dashboard_panels "
+                . "WHERE tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+                . "AND dashboard_id = '" . ciniki_core_dbQuote($ciniki, $args['dashboard_id']) . "' "
+                . "";
+            ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQuery');
+            $rc = ciniki_core_dbHashQuery($ciniki, $strsql, 'qruqsp.dashboard','item');
+            if( $rc['stat'] != 'ok' ) {
+                return $rc;
+            }
+            $seq = (isset($rc['item']['num']) ? $rc['item']['num'] + 1 : 1);
+        }
         $panel = array('id'=>0,
             'title'=>'',
-            'sequence'=>'',
+            'sequence'=>$seq,
             'panel_ref'=>'',
             'settings'=>array(
                 ),

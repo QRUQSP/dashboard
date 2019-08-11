@@ -48,41 +48,62 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
         . "dashboards.name, "
         . "dashboards.permalink, "
         . "dashboards.theme, "
-        . "panels.id AS panel_id, "
-        . "panels.title, "
-        . "panels.sequence, "
-        . "panels.panel_ref, "
-        . "panels.settings "
+        . "dashboards.settings AS db_settings "
         . "FROM qruqsp_dashboards AS dashboards "
-        . "LEFT JOIN qruqsp_dashboard_panels AS panels ON ("
-            . "dashboards.id = panels.dashboard_id "
-            . "AND dashboards.tnid = '" . ciniki_core_dbQuote($ciniki, $tnid) . "' "
-            . ") "
         . "WHERE dashboards.tnid = '" . ciniki_core_dbQuote($ciniki, $tnid) . "' ";
     if( isset($args['dashboard_id']) && $args['dashboard_id'] > 0 ) {
         $strsql .= "AND dashboards.id = '" . ciniki_core_dbQuote($ciniki, $args['dashboard_id']) . "' ";
     } elseif( $permalink != '' ) {
         $strsql .= "AND dashboards.permalink = '" . ciniki_core_dbQuote($ciniki, $permalink) . "' ";
     }
-    $strsql .= "ORDER BY dashboards.id, panels.sequence ";
+    $strsql .= "ORDER BY dashboards.id ";
     if( !isset($args['dashboard_id']) || $permalink == '' ) {
         $strsql .= "LIMIT 1 ";
     }
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.dashboard', array(
-        array('container'=>'dashboards', 'fname'=>'id', 'fields'=>array('id', 'name', 'permalink', 'theme')),
-        array('container'=>'panels', 'fname'=>'panel_id', 'fields'=>array('id'=>'panel_id', 'title', 'sequence', 'panel_ref', 'settings')),
+        array('container'=>'dashboards', 'fname'=>'id', 'fields'=>array('id', 'name', 'permalink', 'theme', 'settings'=>'db_settings')),
         ));
     if( $rc['stat'] != 'ok' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.8', 'msg'=>'Unable to load dashboard', 'err'=>$rc['err']));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.29', 'msg'=>'Unable to load dashboard', 'err'=>$rc['err']));
     }
     if( !isset($rc['dashboards'][0]) ) {
         if( !isset($args['dashboard_id']) && $permalink == 'default' ) {
             return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.7', 'msg'=>'No dashboards configured.'));
         }
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.6', 'msg'=>'Unable to find requested dashboard'));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.27', 'msg'=>'Unable to find requested dashboard'));
     }
     $dashboard = $rc['dashboards'][0]; 
+    if( $rc['dashboards'][0]['settings'] != '' ) {
+        $dashboard['settings'] = unserialize($rc['dashboards'][0]['settings']);
+    } else {    
+        $dashboard['settings'] = array();
+    }
+
+    //
+    // Load the panels
+    //
+    $strsql = "SELECT panels.id, "
+        . "panels.title, "
+        . "panels.sequence, "
+        . "panels.panel_ref, "
+        . "panels.settings "
+        . "FROM qruqsp_dashboard_panels AS panels "
+        . "WHERE panels.dashboard_id = '" . ciniki_core_dbQuote($ciniki, $dashboard['id']) . "' "
+        . "AND panels.tnid = '" . ciniki_core_dbQuote($ciniki, $tnid) . "' "
+        . "ORDER BY panels.sequence "
+        . "";
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
+    $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.dashboard', array(
+        array('container'=>'panels', 'fname'=>'id', 'fields'=>array('id', 'title', 'sequence', 'panel_ref', 'settings')),
+        ));
+    if( $rc['stat'] != 'ok' ) {
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.8', 'msg'=>'Unable to load dashboard panels', 'err'=>$rc['err']));
+    }
+    if( !isset($rc['panels']) ) {
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.6', 'msg'=>'Unable to find dashboard panels'));
+    }
+    $dashboard['panels'] = $rc['panels'];
 
     //
     // Setup the panels
@@ -196,8 +217,14 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     $js = '';
     $js_panels = array();
     $js_panel_sequence = "var db_panel_order = [";
-    $html = '</head>'
-        . '<body>';
+    $html = '</head>';
+    if( isset($dashboard['settings']['slideshow-mode']) && $dashboard['settings']['slideshow-mode'] == 'manual' 
+        && count($dashboard['panels']) > 1 
+        ) {
+        $html .= '<body><div class="container" onclick="db_advance();">';
+    } else {
+        $html .= '<body><div class="container">';
+    }
 
     $dt = new DateTime('now', new DateTimezone($intl_timezone));
 
@@ -211,6 +238,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     //
     // Add the panels
     //
+    $display='block';
     foreach($dashboard['panels'] as $pid => $panel) {
         $js_panel_sequence .= $panel['id'] . ',';
         if( isset($panel['css']) && $panel['css'] != '' ) {
@@ -223,7 +251,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
             }
         }
         if( isset($panel['content']) && $panel['content'] != '' ) {
-            $html .= "<div id='panel-{$panel['id']}' class='panel'>";
+            $html .= "<div id='panel-{$panel['id']}' class='panel' display='{$display};'>";
             $html .= $panel['content'];
             $html .= '</div>';
         }
@@ -238,6 +266,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
             'settings' => $panel['settings'],
             'data' => $panel['data'],
             );
+        $display = 'none';
     }
 
     $css .= "</style>\n";
@@ -245,6 +274,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     $js = "<script type='text/javascript'>"
         . "var url='/dashboard" . ($permalink != '' ? '/' . $permalink : '') . "'; "
         . "var db_panels = " . json_encode($js_panels) . ";" 
+        . "var db_settings = " . json_encode($dashboard['settings']) . ";"
         . $js_panel_sequence 
         . $js 
         . "</script>";
@@ -254,7 +284,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     if( file_exists($dashboard['core-dir'] . '/dashboard.js') ) {
         $js .= '<script type="text/javascript" src="' . $dashboard['core-url'] . '/dashboard.js"></script>';
     }
-    $html .= '</body>'
+    $html .= '</div></body>'
         . '</html>';
 
     return array('stat'=>'ok', 'html'=>$content . $css . $js . $html);
