@@ -218,9 +218,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     $js_panels = array();
     $js_panel_sequence = "var db_panel_order = [";
     $html = '</head>';
-    if( isset($dashboard['settings']['slideshow-mode']) && $dashboard['settings']['slideshow-mode'] == 'manual' 
-        && count($dashboard['panels']) > 1 
-        ) {
+    if( count($dashboard['panels']) > 1 ) {
         $html .= '<body><div class="container" onclick="db_advance();">';
     } else {
         $html .= '<body><div class="container">';
