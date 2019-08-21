@@ -32,6 +32,7 @@ function qruqsp_dashboard_hooks_uiSettings(&$ciniki, $tnid, $args) {
         $menu_item = array(
             'priority'=>550,
             'label'=>'Dashboards',
+            'helpcontent'=>'You can setup dashboards to view weather easily on tablets or other devices. Design any layout you want.',
             'edit'=>array('app'=>'qruqsp.dashboard.main'),
             );
         $rsp['menu_items'][] = $menu_item;
