@@ -9,18 +9,21 @@
 // Returns
 // -------
 //
-function qruqsp_dashboard_panelUpdate(&$ciniki) {
+function qruqsp_dashboard_cellUpdate(&$ciniki) {
     //
     // Find all the required and optional arguments
     //
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'prepareArgs');
     $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
-        'panel_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Panel'),
-        'title'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Title'),
-        'sequence'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Order'),
-        'rows'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Rows'),
-        'cols'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Columns'),
+        'cell_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Cell'),
+        'panel_id'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Panel'),
+        'row'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Row'),
+        'col'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Column'),
+        'rowspan'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Row Span'),
+        'colspan'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Column Span'),
+        'widget_ref'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Widget Reference'),
+        'settings'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Settings'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
@@ -32,54 +35,54 @@ function qruqsp_dashboard_panelUpdate(&$ciniki) {
     // check permission to run this function for this tenant
     //
     ciniki_core_loadMethod($ciniki, 'qruqsp', 'dashboard', 'private', 'checkAccess');
-    $rc = qruqsp_dashboard_checkAccess($ciniki, $args['tnid'], 'qruqsp.dashboard.panelUpdate');
+    $rc = qruqsp_dashboard_checkAccess($ciniki, $args['tnid'], 'qruqsp.dashboard.cellUpdate');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
 
     //
-    // Load the current panel
+    // Load the current cell
     //
-    $strsql = "SELECT id, title, sequence, settings "
-        . "FROM qruqsp_dashboard_panels "
-        . "WHERE id = '" . ciniki_core_dbQuote($ciniki, $args['panel_id']) . "' "
+    $strsql = "SELECT id, row, col, widget_ref, settings "
+        . "FROM qruqsp_dashboard_cells "
+        . "WHERE id = '" . ciniki_core_dbQuote($ciniki, $args['cell_id']) . "' "
         . "AND tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
         . "";
-    $rc = ciniki_core_dbHashQuery($ciniki, $strsql, 'qruqsp.dashboard', 'panel');
+    $rc = ciniki_core_dbHashQuery($ciniki, $strsql, 'qruqsp.dashboard', 'cell');
     if( $rc['stat'] != 'ok' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.23', 'msg'=>'Unable to load panel', 'err'=>$rc['err']));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.41', 'msg'=>'Unable to load cell', 'err'=>$rc['err']));
     }
-    if( !isset($rc['panel']) ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.42', 'msg'=>'Unable to find requested panel'));
+    if( !isset($rc['cell']) ) {
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.24', 'msg'=>'Unable to find requested cell'));
     }
-    $existing_panel = $rc['panel'];
-    $existing_settings = unserialize($rc['panel']['settings']);
+    $existing_cell = $rc['cell'];
+    $existing_settings = unserialize($rc['cell']['settings']);
 
     //
-    // Load the panel
+    // Load the widget
     //
-/*    $panel_ref = isset($args['panel_ref']) ? $args['panel_ref'] : $existing_panel['panel_ref'];
-    list($package, $module, $panel) = explode('.', $panel_ref);
-    $rc = ciniki_core_loadMethod($ciniki, $package, $module, 'hooks', 'dashboardPanels');
+    $widget_ref = isset($args['widget_ref']) ? $args['widget_ref'] : $existing_cell['widget_ref'];
+    list($package, $module, $widget) = explode('.', $widget_ref);
+    $rc = ciniki_core_loadMethod($ciniki, $package, $module, 'hooks', 'dashboardWidgets');
     if( $rc['stat'] != 'ok' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.10', 'msg'=>'Unable to load panel', 'err'=>$rc['err']));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.40', 'msg'=>'Unable to load widget', 'err'=>$rc['err']));
     }
     $fn = $rc['function_call'];
     $rc = $fn($ciniki, $args['tnid'], array());
     if( $rc['stat'] != 'ok' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.44', 'msg'=>'Unable to load panel', 'err'=>$rc['err']));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.46', 'msg'=>'Unable to load widget', 'err'=>$rc['err']));
     }
-    if( !isset($rc['panels'][$panel_ref]) ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.31', 'msg'=>'Invalid panel'));
+    if( !isset($rc['widgets'][$widget_ref]) ) {
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.45', 'msg'=>'Invalid widget'));
     }
-    $panel = $rc['panels'][$panel_ref];
+    $widget = $rc['widgets'][$widget_ref];
 
     //
     // Setup the settings
     //
     $settings = array();
-    if( isset($panel['options']) ) {
-        foreach($panel['options'] as $oid => $option) {
+    if( isset($widget['options']) ) {
+        foreach($widget['options'] as $oid => $option) {
             if( isset($ciniki['request']['args'][$oid]) ) {
                 $settings[$oid] = $ciniki['request']['args'][$oid];
             } elseif( isset($existing_settings[$oid]) ) {
@@ -88,7 +91,7 @@ function qruqsp_dashboard_panelUpdate(&$ciniki) {
         }
     }
     $args['settings'] = serialize($settings); 
-*/
+
     //
     // Start transaction
     //
@@ -102,10 +105,10 @@ function qruqsp_dashboard_panelUpdate(&$ciniki) {
     }
 
     //
-    // Update the Panel in the database
+    // Update the Cell in the database
     //
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'objectUpdate');
-    $rc = ciniki_core_objectUpdate($ciniki, $args['tnid'], 'qruqsp.dashboard.panel', $args['panel_id'], $args, 0x04);
+    $rc = ciniki_core_objectUpdate($ciniki, $args['tnid'], 'qruqsp.dashboard.cell', $args['cell_id'], $args, 0x04);
     if( $rc['stat'] != 'ok' ) {
         ciniki_core_dbTransactionRollback($ciniki, 'qruqsp.dashboard');
         return $rc;
@@ -130,7 +133,7 @@ function qruqsp_dashboard_panelUpdate(&$ciniki) {
     // Update the web index if enabled
     //
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'hookExec');
-    ciniki_core_hookExec($ciniki, $args['tnid'], 'ciniki', 'web', 'indexObject', array('object'=>'qruqsp.dashboard.panel', 'object_id'=>$args['panel_id']));
+    ciniki_core_hookExec($ciniki, $args['tnid'], 'ciniki', 'web', 'indexObject', array('object'=>'qruqsp.dashboard.cell', 'object_id'=>$args['cell_id']));
 
     return array('stat'=>'ok');
 }

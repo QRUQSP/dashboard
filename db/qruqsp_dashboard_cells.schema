@@ -1,0 +1,45 @@
+#
+# Description
+# -----------
+# This table stores the cells of a panel and the widgets within them.
+#
+# Fields
+# ------
+# id:                       The ID assigned to the record.
+# uuid:                     The Universal Unique ID.
+# tnid:                     The Tenant ID the record belongs to.
+#
+# panel_id:                 The ID of the panel the cell is attached to.
+# row:                      The row in the panel grid to place the cell.
+# col:                      The column in the panel grid to place the cell.
+# rowspan:                  The number of rows for the cell to span.
+# colspan:                  The number of columns for the cell to span.
+#
+# widget_ref:               The widget reference used to get the cell content.
+#
+# settings:                 The additional settings for the widget, stored as serialized PHP array which can be converted
+#                           to JSON for the javascript.
+#
+# date_added:               The UTC date and time the record was added.
+# last_updated:             The UTC date and time the record was last update.
+#
+create table qruqsp_dashboard_cells (
+    id int not null auto_increment,
+    uuid char(36) not null,
+    tnid int not null,
+
+    panel_id int not null,
+    row int not null,
+    col int not null,
+    rowspan int not null,
+    colspan int not null,
+    widget_ref varchar(250) not null,
+    settings text not null,
+
+    date_added datetime not null,
+    last_updated datetime not null,
+    primary key (id),
+    unique index (uuid),
+    index (panel_id),
+    index sync (tnid, uuid, last_updated)
+) ENGINE='InnoDB', COMMENT='v1.01';

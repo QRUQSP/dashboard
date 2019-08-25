@@ -14,6 +14,10 @@
 // 
 function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
 
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbQuoteIDs');
+    ciniki_core_loadMethod($ciniki, 'qruqsp', 'dashboard', 'private', 'loadCell');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
+
     //
     // Load the tenant details
     //
@@ -40,6 +44,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
         return $rc;
     }
     $intl_timezone = $rc['settings']['intl-default-timezone'];
+    $dt = new DateTime('now', new DateTimezone($intl_timezone));
         
     //
     // Load the dashboard
@@ -60,7 +65,6 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     if( !isset($args['dashboard_id']) || $permalink == '' ) {
         $strsql .= "LIMIT 1 ";
     }
-    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.dashboard', array(
         array('container'=>'dashboards', 'fname'=>'id', 'fields'=>array('id', 'name', 'permalink', 'theme', 'settings'=>'db_settings')),
         ));
@@ -81,21 +85,45 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     }
 
     //
-    // Load the panels
+    // Check if this is a panel update request
+    //
+    $action = 'load';
+    if( isset($_GET['update']) ) {
+        $panel_ids = explode(',', $_GET['update']);    
+        $action = 'update';
+    }
+
+    //
+    // Load the panels and cells
     //
     $strsql = "SELECT panels.id, "
         . "panels.title, "
         . "panels.sequence, "
-        . "panels.panel_ref, "
-        . "panels.settings "
+        . "panels.rows, "
+        . "panels.cols, "
+        . "panels.settings, "
+        . "cells.id AS cell_id, "
+        . "cells.row, "
+        . "cells.col, "
+        . "cells.rowspan, "
+        . "cells.colspan, "
+        . "cells.widget_ref, "
+        . "cells.settings AS cell_settings "
         . "FROM qruqsp_dashboard_panels AS panels "
+        . "LEFT JOIN qruqsp_dashboard_cells AS cells ON ("
+            . "panels.id = cells.panel_id "
+            . "AND cells.tnid = '" . ciniki_core_dbQuote($ciniki, $tnid) . "' "
+            . ") "
         . "WHERE panels.dashboard_id = '" . ciniki_core_dbQuote($ciniki, $dashboard['id']) . "' "
-        . "AND panels.tnid = '" . ciniki_core_dbQuote($ciniki, $tnid) . "' "
-        . "ORDER BY panels.sequence "
+        . "AND panels.tnid = '" . ciniki_core_dbQuote($ciniki, $tnid) . "' ";
+    if( $action == 'update' && count($panel_ids) > 0 ) {
+        $strsql .= "AND panels.id IN (" . ciniki_core_dbQuoteIDs($ciniki, $panel_ids) . ") ";
+    }
+    $strsql .= "ORDER BY panels.sequence, cells.row, cells.col "
         . "";
-    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.dashboard', array(
-        array('container'=>'panels', 'fname'=>'id', 'fields'=>array('id', 'title', 'sequence', 'panel_ref', 'settings')),
+        array('container'=>'panels', 'fname'=>'id', 'fields'=>array('id', 'title', 'sequence', 'rows', 'cols', 'settings')),
+        array('container'=>'cells', 'fname'=>'cell_id', 'fields'=>array('id'=>'cell_id', 'row', 'col', 'rowspan', 'colspan', 'widget_ref', 'settings'=>'cell_settings')),
         ));
     if( $rc['stat'] != 'ok' ) {
         return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.8', 'msg'=>'Unable to load dashboard panels', 'err'=>$rc['err']));
@@ -110,10 +138,16 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     //
     foreach($dashboard['panels'] as $pid => $panel) {
         $dashboard['panels'][$pid]['settings'] = unserialize($panel['settings']);
-        $dashboard['panels'][$pid]['content'] = '';
-        $dashboard['panels'][$pid]['css'] = '';
-        $dashboard['panels'][$pid]['js'] = '';
         $dashboard['panels'][$pid]['data'] = array();
+        if( isset($panel['cells']) ) {
+            foreach($panel['cells'] as $cid => $cell) {
+                $dashboard['panels'][$pid]['cells'][$cid]['settings'] = unserialize($cell['settings']);
+                $dashboard['panels'][$pid]['cells'][$cid]['content'] = '';
+                $dashboard['panels'][$pid]['cells'][$cid]['css'] = '';
+                $dashboard['panels'][$pid]['cells'][$cid]['js'] = '';
+                $dashboard['panels'][$pid]['cells'][$cid]['data'] = array();
+            }
+        }
     }
 
     //
@@ -145,18 +179,28 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     }
 
     //
-    // Check if this is a panel update request
+    // Load the cell widget data
     //
-    $action = 'load';
-    if( isset($_GET['update']) ) {
-        $panel_ids = explode(',', $_GET['update']);    
-        $action = 'update';
+    foreach($dashboard['panels'] as $pid => $panel) {
+        if( isset($panel['cells']) ) {
+            foreach($panel['cells'] as $cid => $cell) {
+                if( isset($cell['widget_ref']) ) {
+                    $rc = qruqsp_dashboard_loadCell($ciniki, $tnid, $action, $cell);
+                    if( $rc['stat'] != 'ok' ) {
+                        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.53', 'msg'=>'Panel', 'err'=>$rc['err']));
+                    }
+                    if( isset($rc['cell']) ) {
+                        $dashboard['panels'][$pid]['cells'][$cid] = $rc['cell'];
+                    }
+                }
+            }
+        }
     }
-
+    
     //
     // Load the panel content
     //
-    foreach($dashboard['panels'] as $pid => $panel) {
+/*    foreach($dashboard['panels'] as $pid => $panel) {
         $p = explode('.', $panel['panel_ref']);
         if( isset($p[1]) && $p[1] != '' && (!isset($panel_ids) || in_array($panel['id'], $panel_ids)) ) {
             $rc = ciniki_core_loadMethod($ciniki, $p[0], $p[1], 'hooks', 'dashboardPanel');
@@ -167,22 +211,27 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
                     'panel'=>$panel,
                     ));
                 if( $rc['stat'] != 'ok' ) {
-                    return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.9', 'msg'=>'Panel', 'err'=>$rc['err']));
+                    return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.52', 'msg'=>'Panel', 'err'=>$rc['err']));
                 }
                 $dashboard['panels'][$pid] = $rc['panel'];
             }
         }
     }
-
+*/
     //
     // Check if just the data should be sent back
     //
     if( $action == 'update' ) {
         $data = array();
         foreach($dashboard['panels'] as $pid => $panel) {
-            $data[$panel['id']] = $panel['data'];
+            if( isset($panel['cells']) ) {
+                foreach($panel['cells'] as $cid => $cell) {
+                    $data[$panel['id']][$cell['id']] = $cell['data'];
+                }
+            }
+//            $data[$panel['id']] = $panel['data'];
         }
-        return array('stat'=>'ok', 'data'=>$data);
+        return array('stat'=>'ok', 'data'=>$data, 'lastupdated'=>$dt->format('M d, Y H:i:s'));
     }
 
     //
@@ -201,13 +250,16 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     $content .= '<title>' . $dashboard['name'] . '</title>';
 
     //
-    // Include the stylesheets and javascript for the dashboard
+    // Include the stylesheets and javascript for the dashboard.
+    // Currently included directly into script so less calls to pi and less caching issues.
+    // In cloud instance this may need to change to be links to content so browser can cache.
     //
     if( file_exists($dashboard['theme-dir'] . '/style.css') ) {
-        $content .= '<link rel="stylesheet" type="text/css" href="' . $dashboard['theme-url'] . '/style.css" />';
+//        $content .= '<link rel="stylesheet" type="text/css" href="' . $dashboard['theme-url'] . '/style.css" />';
+        $content .= '<style>' . file_get_contents($dashboard['theme-dir'] . '/style.css') . '</style>';
     }
     if( file_exists($dashboard['theme-dir'] . '/theme.js') ) {
-        $content .= '<script type="text/javascript" src="' . $dashboard['theme-url'] . '/theme.js"></script>';
+        $content .= '<script type="text/javascript">' . file_get_contents($dashboard['theme-dir'] . '/theme.js') . '</script>';
     }
    
     //
@@ -216,15 +268,14 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     $css = '<style>';
     $js = '';
     $js_panels = array();
+    $js_cells = array();
     $js_panel_sequence = "var db_panel_order = [";
     $html = '</head>';
     if( count($dashboard['panels']) > 1 ) {
-        $html .= '<body><div class="container" onclick="db_advance();">';
+        $html .= '<body onresize="db_resize(); setTimeout(db_resize,250);"><div id="dbc" class="container" onclick="db_advance();">';
     } else {
-        $html .= '<body><div class="container">';
+        $html .= '<body onresize="db_resize(); setTimeout(db_resize,250);"><div id="dbc" class="container">';
     }
-
-    $dt = new DateTime('now', new DateTimezone($intl_timezone));
 
     //
     // Check for no panels
@@ -239,20 +290,130 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     $display='block';
     foreach($dashboard['panels'] as $pid => $panel) {
         $js_panel_sequence .= $panel['id'] . ',';
-        if( isset($panel['css']) && $panel['css'] != '' ) {
-            $css .= $panel['css'] . "\n"; 
-        }
-        // Add javascript function
-        if( isset($panel['js']) ) {
-            foreach($panel['js'] as $name => $func) {
-                $js .= "db_panels[{$panel['id']}]['{$name}'] = " . $func;
+        $update_cell_ids = array();
+        //
+        // Setup the grid that will form the html table
+        //
+        $grid = array();
+        for($row = 1; $row <= $panel['rows']; $row++) {
+            $grid[$row] = array();
+            for($col = 1; $col <= $panel['cols']; $col++) {
+                $grid[$row][$col] = array(
+                    'type' => 'empty',
+                    );
             }
         }
-        if( isset($panel['content']) && $panel['content'] != '' ) {
-            $html .= "<div id='panel-{$panel['id']}' class='panel' display='{$display};'>";
-            $html .= $panel['content'];
-            $html .= '</div>';
+        //
+        // Add the cells to the grid
+        //
+        if( isset($panel['cells']) ) {
+            foreach($panel['cells'] as $cid => $cell) {
+                if( !isset($grid[$cell['row']][$cell['col']]) ) {
+                    continue;    
+                }
+                if( isset($cell['css']) && $cell['css'] != '' ) {
+                    $css .= $cell['css'] . "\n"; 
+                }
+                if( isset($grid[$cell['row']][$cell['col']]['type']) && $grid[$cell['row']][$cell['col']]['type'] == 'hidden' ) {
+                    continue;
+                }
+                $grid[$cell['row']][$cell['col']]['type'] = 'widget';
+                $grid[$cell['row']][$cell['col']]['cid'] = $cid;
+                $js_cells[$cell['id']] = array(
+                    'id' => $cell['id'],
+                    'row' => $cell['row'],
+                    'col' => $cell['col'],
+                    'rowspan' => $cell['rowspan'],
+                    'colspan' => $cell['colspan'],
+                    );
+                $panel['data'][$cell['id']] = (isset($cell['data']) ? $cell['data'] : array());
+
+                // 
+                // Mark empty cells as result of col/rowspans
+                // 
+                if( $cell['rowspan'] > 1 || $cell['colspan'] > 1 ) {
+                    for($row = $cell['row']; $row < $cell['row'] + $cell['rowspan']; $row++) {
+                        for($col = $cell['col']; $col < $cell['col'] + $cell['colspan']; $col++) {
+                            // Skip first cell as it's the actual cell
+                            if( $col == $cell['col'] && $row == $cell['row'] ) {
+                                continue;
+                            }
+                            if( isset($grid[$row][$col]['type']) ) {
+                                $grid[$row][$col]['type'] = 'hidden';
+                            }
+                        }
+                    }
+                }
+
+                //
+                // Add javascript
+                //
+                if( isset($cell['js']) ) {
+                    foreach($cell['js'] as $name => $func) {
+                        $js .= "db_cells[{$cell['id']}]['{$name}'] = " . $func;
+                        if( $name == 'update' ) { 
+                            $update_cell_ids[] = $cell['id'];
+                        }
+                    }
+                }
+            }
         }
+        //
+        // Setup the html for the panel and table inside
+        //
+        $html .= "<div id='panel-{$panel['id']}' class='panel' display='{$display};'>"
+            . "<table class='panel panel-{$panel['id']}'><tbody>";
+        for($row = 1; $row <= $panel['rows']; $row++) {
+            // Add spacer row
+            if( $row == 1 ) {   
+                $html .= "<tr class='spacing'><td class='spacing'></td>";
+                for($col = 1; $col <= $panel['cols']; $col++) {
+                    $html .= "<td></td>";
+                }
+                $html .= "</tr>";
+            }
+            //
+            // $rowstart is used once, then reset to blank on each row
+            // row is only added if one or more cells are visible
+            //
+            $rowstart = "<tr><td class='spacing'></td>";
+            for($col = 1; $col <= $panel['cols']; $col++) {
+                if( $grid[$row][$col]['type'] == 'hidden' ) {
+                    continue;
+                }
+                if( isset($grid[$row][$col]['cid']) ) {
+                    $cell = $panel['cells'][$grid[$row][$col]['cid']];
+                    $class = '';
+                    if( $cell['colspan'] > 1 ) {
+                        $class = 'w' . $cell['colspan'];
+                    }
+                    if( $cell['rowspan'] > 1 ) {
+                        $class .= ($class != '' ? ' ' : '') . 'h' . $cell['rowspan'];
+                    }
+                    $html .= $rowstart . "<td"
+                        . ($class != '' ? " class='" . $class . "'" : '')
+                        . ($cell['rowspan'] > 1 ? " rowspan='" . $cell['rowspan'] . "'" : '')
+                        . ($cell['colspan'] > 1 ? " colspan='" . $cell['colspan'] . "'" : '')
+                        . ">";
+                    $rowstart = '';
+                    if( isset($cell['content']) ) {
+                        $html .= "<div id='widget-{$cell['id']}' class='widget'>";
+                        $html .= $cell['content'];
+                        $html .= "</div>";
+                    }
+                    $html .= "</td>";
+                } else {
+                    $html .= $rowstart . "<td></td>";
+                    $rowstart = '';
+                }
+            }
+            if( $rowstart == '' ) {
+                $html .= "</tr>";
+            } else {
+                $html .= $rowstart . "</tr>";
+            }
+        }
+        $html .= '</tbody></table></div>';
         //
         // Add the panel to the array of panels
         //
@@ -260,18 +421,28 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
             'id' => $panel['id'],
             'title' => $panel['title'],
             'sequence' => $panel['sequence'],
-            'panel_ref' => $panel['panel_ref'],
+            'rows' => $panel['rows'],
+            'cols' => $panel['cols'],
             'settings' => $panel['settings'],
             'data' => $panel['data'],
             );
+        if( count($update_cell_ids) > 0 ) {
+            $js .= "db_panels[{$panel['id']}]['update'] = function(data) {";
+            foreach($update_cell_ids as $cell_id) {
+                $js .= "db_cells[{$cell_id}].update(data[{$cell_id}]);";
+            }
+            $js .= "}; ";
+        }
         $display = 'none';
     }
 
     $css .= "</style>\n";
+    $css .= "<style id='sizing'></style>";
     $js_panel_sequence .= '];';
     $js = "<script type='text/javascript'>"
         . "var url='/dashboard" . ($permalink != '' ? '/' . $permalink : '') . "'; "
         . "var db_panels = " . json_encode($js_panels) . ";" 
+        . "var db_cells = " . json_encode($js_cells) . ";" 
         . "var db_settings = " . json_encode($dashboard['settings']) . ";"
         . $js_panel_sequence 
         . $js 
@@ -280,9 +451,9 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     // Dashboard must be included after db_panel array is setup
     //
     if( file_exists($dashboard['core-dir'] . '/dashboard.js') ) {
-        $js .= '<script type="text/javascript" src="' . $dashboard['core-url'] . '/dashboard.js"></script>';
+        $js .= '<script type="text/javascript">' . file_get_contents($dashboard['core-dir'] . '/dashboard.js') . '</script>';
     }
-    $html .= '</div></body>'
+    $html .= '</div><div id="lastupdated">' . $dt->format('M d, Y H:i:s') . '</div></body>'
         . '</html>';
 
     return array('stat'=>'ok', 'html'=>$content . $css . $js . $html);

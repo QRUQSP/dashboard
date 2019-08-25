@@ -14,7 +14,8 @@
 # title:                    The title for the panel.
 # sequence:                 The order to display the panel in.
 #
-# panel_ref:                The panel to use, which is in the form of package.module.panel
+# rows:                     The number of rows in the panel grid.
+# cols:                     The number of columns in the panel grid.
 #
 # settings:                 The additional settings for the panel, stored as serialized PHP array which can be converted
 #                           to JSON for the javascript.
@@ -29,7 +30,8 @@ create table qruqsp_dashboard_panels (
     dashboard_id int not null,
     title varchar(250) not null,
     sequence tinyint unsigned not null,
-    panel_ref varchar(250) not null,
+    rows int not null,
+    cols int not null,
     settings text not null,
     date_added datetime not null,
     last_updated datetime not null,

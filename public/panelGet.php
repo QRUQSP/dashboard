@@ -78,7 +78,8 @@ function qruqsp_dashboard_panelGet($ciniki) {
         $panel = array('id'=>0,
             'title'=>'',
             'sequence'=>$seq,
-            'panel_ref'=>'',
+            'rows'=>'2',
+            'cols'=>'3',
             'settings'=>array(
                 ),
         );
@@ -91,7 +92,8 @@ function qruqsp_dashboard_panelGet($ciniki) {
         $strsql = "SELECT qruqsp_dashboard_panels.id, "
             . "qruqsp_dashboard_panels.title, "
             . "qruqsp_dashboard_panels.sequence, "
-            . "qruqsp_dashboard_panels.panel_ref, "
+            . "qruqsp_dashboard_panels.rows, "
+            . "qruqsp_dashboard_panels.cols, "
             . "qruqsp_dashboard_panels.settings "
             . "FROM qruqsp_dashboard_panels "
             . "WHERE qruqsp_dashboard_panels.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
@@ -100,7 +102,7 @@ function qruqsp_dashboard_panelGet($ciniki) {
         ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
         $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.dashboard', array(
             array('container'=>'panels', 'fname'=>'id', 
-                'fields'=>array('title', 'sequence', 'panel_ref', 'settings'),
+                'fields'=>array('title', 'sequence', 'rows', 'cols', 'settings'),
                 ),
             ));
         if( $rc['stat'] != 'ok' ) {
@@ -111,22 +113,75 @@ function qruqsp_dashboard_panelGet($ciniki) {
         }
         $panel = $rc['panels'][0];
         $panel['settings'] = unserialize($panel['settings']);
+
+        //
+        // Get the list of widgets
+        //
+        $strsql = "SELECT cells.id, "
+            . "cells.panel_id, "
+            . "cells.row, "
+            . "cells.col, "
+            . "cells.rowspan, "
+            . "cells.colspan, "
+            . "cells.widget_ref, "
+            . "cells.settings "
+            . "FROM qruqsp_dashboard_cells AS cells "
+            . "WHERE cells.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+            . "AND cells.panel_id = '" . ciniki_core_dbQuote($ciniki, $args['panel_id']) . "' "
+            . "ORDER BY cells.row, cells.col "
+            . "";
+        ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
+        $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.dashboard', array(
+            array('container'=>'cells', 'fname'=>'id', 
+                'fields'=>array('id', 'panel_id', 'row', 'col', 'rowspan', 'colspan', 'widget_ref', 'settings'),
+                ),
+            ));
+        if( $rc['stat'] != 'ok' ) {
+            return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.37', 'msg'=>'Cells not found', 'err'=>$rc['err']));
+        }
+        $panel['cells'] = isset($rc['cells']) ? $rc['cells'] : array();
+
+        foreach($panel['cells'] as $cid => $cell) {
+            $panel['cells'][$cid]['name'] = '';
+            $panel['cells'][$cid]['settings'] = unserialize($cell['settings']);
+            if( isset($panel['cells'][$cid]['settings']['name']) ) {
+                $panel['cells'][$cid]['name'] = $panel['cells'][$cid]['settings']['name'];
+            }
+            if( $panel['cells'][$cid]['name'] == '' && isset($panel['cells'][$cid]['settings']['title']) ) {
+                $panel['cells'][$cid]['name'] = $panel['cells'][$cid]['settings']['title'];
+            }
+            if( $panel['cells'][$cid]['name'] == '' && isset($panel['cells'][$cid]['settings']['label']) ) {
+                $panel['cells'][$cid]['name'] = $panel['cells'][$cid]['settings']['label'];
+            }
+            if( $panel['cells'][$cid]['name'] == '' && $cell['widget_ref'] != '' ) {
+                list($pkg, $mod, $widget) = explode('.', $cell['widget_ref']);
+                $rc = ciniki_core_loadMethod($ciniki, $pkg, $mod, 'hooks', 'dashboardWidgets');
+                if( $rc['stat'] == 'ok' ) {
+                    $fn = $rc['function_call'];
+                    $rc = $fn($ciniki, $args['tnid'], array());
+                    if( $rc['stat'] != 'ok' ) {
+                        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.39', 'msg'=>'Error retrieving widgets', 'err'=>$rc['err']));
+                    }
+                    if( isset($rc['widgets'][$cell['widget_ref']]['name']) ) {
+                        $panel['cells'][$cid]['name'] = $rc['widgets'][$cell['widget_ref']]['name'];
+                    }
+                }
+            }
+        }
     }
 
-    $rsp = array('stat'=>'ok', 'panel'=>$panel, 'panels'=>array());
+    $rsp = array('stat'=>'ok', 'panel'=>$panel);
 
     //
     // Get the list of available panels
     //
-    foreach($ciniki['tenant']['modules'] as $module => $m) {
+/*    foreach($ciniki['tenant']['modules'] as $module => $m) {
         list($pkg, $mod) = explode('.', $module);
         $rc = ciniki_core_loadMethod($ciniki, $pkg, $mod, 'hooks', 'dashboardPanels');
         if( $rc['stat'] == 'ok' ) {
             $fn = $rc['function_call'];
             $rc = $fn($ciniki, $args['tnid'], array());
-            if( $rc['stat'] != 'ok' ) {
-                return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.5', 'msg'=>'Error retrieving panels', 'err'=>$rc['err']));
-            }
+            if( $rc['stat'] != 'ok' ) { return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.32', 'msg'=>'Error retrieving panels', 'err'=>$rc['err'])); }
             if( isset($rc['panels']) ) {
                 $rsp['panels'] = array_merge($rsp['panels'], $rc['panels']);
             }
@@ -140,7 +195,7 @@ function qruqsp_dashboard_panelGet($ciniki) {
         reset($rsp['panels']);
         $rsp['panel']['panel_ref'] = key($rsp['panels']);
     }
-
+*/
 
     return $rsp;
 }

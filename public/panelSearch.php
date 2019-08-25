@@ -44,8 +44,7 @@ function qruqsp_dashboard_panelSearch($ciniki) {
     //
     $strsql = "SELECT qruqsp_dashboard_panels.id, "
         . "qruqsp_dashboard_panels.title, "
-        . "qruqsp_dashboard_panels.sequence, "
-        . "qruqsp_dashboard_panels.panel_ref "
+        . "qruqsp_dashboard_panels.sequence "
         . "FROM qruqsp_dashboard_panels "
         . "WHERE qruqsp_dashboard_panels.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
         . "AND ("
@@ -61,7 +60,7 @@ function qruqsp_dashboard_panelSearch($ciniki) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.dashboard', array(
         array('container'=>'panels', 'fname'=>'id', 
-            'fields'=>array('id', 'title', 'sequence', 'panel_ref')),
+            'fields'=>array('id', 'title', 'sequence')),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;

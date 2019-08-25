@@ -238,15 +238,22 @@ function qruqsp_dashboard_main() {
         'general':{'label':'', 'fields':{
             'title':{'label':'Title', 'required':'yes', 'type':'text'},
             'sequence':{'label':'Order', 'type':'text'},
+            'cols':{'label':'Grid Columns', 'type':'text', 'size':'small'},
+            'rows':{'label':'Grid Rows', 'type':'text', 'size':'small'},
             }},
-        '_panel':{'label':'Choose the panel template', 'fields':{
-            'panel_ref':{'label':'', 'hidelabel':'yes', 'required':'yes', 'type':'select', 
-                'options':{}, //'complex_options':{'value':'value', 'name':'name'},
-                'onchange':'M.qruqsp_dashboard_main.panel.updateModuleOptions();',
-                },
-            }},
-        '_panel_options':{'label':'Options', 'visible':'hidden', 'fields':{
-            }},
+//        '_panel':{'label':'Choose the panel template', 'fields':{
+//            'panel_ref':{'label':'', 'hidelabel':'yes', 'required':'yes', 'type':'select', 
+//                'options':{}, //'complex_options':{'value':'value', 'name':'name'},
+//                'onchange':'M.qruqsp_dashboard_main.panel.updateModuleOptions();',
+//                },
+//            }},
+//        '_panel_options':{'label':'Options', 'visible':'hidden', 'fields':{
+//            }},
+        'cells':{'label':'Widgets', 'type':'simplegrid', 'num_cols':3, 
+            'headerValues':['Row', 'Col', 'Name'],
+            'addTxt':'Add Widget',
+            'addFn':'M.qruqsp_dashboard_main.panel.save("M.qruqsp_dashboard_main.cell.open(\'M.qruqsp_dashboard_main.panel.open();\',0,M.qruqsp_dashboard_main.panel.panel_id);");',
+            },
         '_buttons':{'label':'', 'buttons':{
             'save':{'label':'Save', 'fn':'M.qruqsp_dashboard_main.panel.save();'},
             'delete':{'label':'Delete', 
@@ -255,15 +262,15 @@ function qruqsp_dashboard_main() {
             }},
         };
     this.panel.fieldValue = function(s, i, d) { 
-        if( s == '_panel_options' ) {
-            return this.data.settings[i];
-        }
+//        if( s == '_panel_options' ) {
+//            return this.data.settings[i];
+//        }
         return this.data[i]; 
     }
     this.panel.fieldHistoryArgs = function(s, i) {
         return {'method':'qruqsp.dashboard.panelHistory', 'args':{'tnid':M.curTenantID, 'panel_id':this.panel_id, 'field':i}};
     }
-    this.panel.updateModuleOptions = function() {
+/*    this.panel.updateModuleOptions = function() {
         this.setModuleOptions(this.formValue('panel_ref'));
     }
     this.panel.setModuleOptions = function(option) {
@@ -280,6 +287,20 @@ function qruqsp_dashboard_main() {
         for(var i in fields) {
             this.showHideFormField('_panel_options', fields[i]);
         }
+    } */
+    this.panel.cellValue = function(s, i, j, d) {
+        if( s == 'cells' ) {
+            switch(j) {
+                case 0: return d.row;
+                case 1: return d.col;
+                case 2: return d.name;
+            }
+        }
+    }
+    this.panel.rowFn = function(s, i, d) {
+        if( s == 'cells' ) {
+            return 'M.qruqsp_dashboard_main.cell.open(\'M.qruqsp_dashboard_main.panel.open();\',\'' + d.id + '\',0,M.qruqsp_dashboard_main.panel.nplist);';
+        }
     }
     this.panel.open = function(cb, pid, did, list) {
         if( pid != null ) { this.panel_id = pid; }
@@ -292,7 +313,7 @@ function qruqsp_dashboard_main() {
             }
             var p = M.qruqsp_dashboard_main.panel;
             p.data = rsp.panel;
-            p.sections._panel.fields.panel_ref.options = [];
+/*            p.sections._panel.fields.panel_ref.options = [];
             for(var i in rsp.panels) {
                 p.sections._panel.fields.panel_ref.options[i] = rsp.panels[i].name;
                 for(var j in rsp.panels[i].options) {
@@ -314,10 +335,10 @@ function qruqsp_dashboard_main() {
                     }
                 }
             }
-            p.panels = rsp.panels;
+            p.panels = rsp.panels; */
             p.refresh();
             p.show(cb);
-            p.setModuleOptions(p.data.panel_ref);
+//            p.setModuleOptions(p.data.panel_ref);
         });
     }
     this.panel.save = function(cb) {
@@ -375,6 +396,161 @@ function qruqsp_dashboard_main() {
     this.panel.addClose('Cancel');
     this.panel.addButton('next', 'Next');
     this.panel.addLeftButton('prev', 'Prev');
+
+    //
+    // The panel to edit cell
+    //
+    this.cell = new M.panel('Widget', 'qruqsp_dashboard_main', 'cell', 'mc', 'medium', 'sectioned', 'qruqsp.dashboard.main.cell');
+    this.cell.data = null;
+    this.cell.widgets = null;
+    this.cell.cell_id = 0;
+    this.cell.panel_id = 0;
+    this.cell.nplist = [];
+    this.cell.sections = {
+        '_widget':{'label':'Choose the widget', 'fields':{
+            'widget_ref':{'label':'', 'hidelabel':'yes', 'required':'yes', 'type':'select', 
+                'options':{}, //'complex_options':{'value':'value', 'name':'name'},
+                'onchange':'M.qruqsp_dashboard_main.cell.updateOptions();',
+                },
+            }},
+        'position':{'label':'Position', 'fields':{
+            'row':{'label':'Row', 'type':'text', 'size':'small'},
+            'col':{'label':'Column', 'type':'text', 'size':'small'},
+            }},
+        'size':{'label':'Size', 'fields':{
+            'colspan':{'label':'Columns', 'type':'text', 'size':'small'},
+            'rowspan':{'label':'Rows', 'type':'text', 'size':'small'},
+            }},
+        '_options':{'label':'Options', 'visible':'hidden', 'fields':{
+            }},
+        '_buttons':{'label':'', 'buttons':{
+            'save':{'label':'Save', 'fn':'M.qruqsp_dashboard_main.cell.save();'},
+            'delete':{'label':'Delete', 
+                'visible':function() {return M.qruqsp_dashboard_main.cell.cell_id > 0 ? 'yes' : 'no'; },
+                'fn':'M.qruqsp_dashboard_main.cell.remove();'},
+            }},
+        };
+    this.cell.fieldValue = function(s, i, d) { 
+        if( s == '_options' ) {
+            return this.data.settings[i];
+        }
+        return this.data[i]; 
+    }
+    this.cell.fieldHistoryArgs = function(s, i) {
+        return {'method':'qruqsp.dashboard.cellHistory', 'args':{'tnid':M.curTenantID, 'cell_id':this.cell_id, 'field':i}};
+    }
+    this.cell.updateOptions = function() {
+        this.setModuleOptions(this.formValue('widget_ref'));
+    }
+    this.cell.setModuleOptions = function(option) {
+        this.sections._options.fields = {};
+        if( this.widgets[option] != null && this.widgets[option].options != null ) {
+            this.sections._options.visible = 'yes';
+            this.sections._options.fields = this.widgets[option].options;
+        } else {
+            this.sections._options.visible = 'hidden';
+        }
+        this.refreshSection('_options');
+    }
+    this.cell.refreshFields = function(fields) {
+        for(var i in fields) {
+            this.showHideFormField('_options', fields[i]);
+        }
+    }
+    this.cell.open = function(cb, cid, pid, list) {
+        if( cid != null ) { this.cell_id = cid; }
+        if( pid != null ) { this.panel_id = pid; }
+        if( list != null ) { this.nplist = list; }
+        M.api.getJSONCb('qruqsp.dashboard.cellGet', {'tnid':M.curTenantID, 'cell_id':this.cell_id, 'panel_id':this.panel_id}, function(rsp) {
+            if( rsp.stat != 'ok' ) {
+                M.api.err(rsp);
+                return false;
+            }
+            var p = M.qruqsp_dashboard_main.cell;
+            p.data = rsp.cell;
+            p.sections._widget.fields.widget_ref.options = [];
+            for(var i in rsp.widgets) {
+                p.sections._widget.fields.widget_ref.options[i] = rsp.widgets[i].category + ' - ' + rsp.widgets[i].name;
+/*                for(var j in rsp.widgets[i].options) {
+                    if( rsp.widgets[i].options[j].vfield != null && rsp.widgets[i].options[j].vshow != null ) {
+                        rsp.widgets[i].options[j].visible = function() {
+                            var p = M.qruqsp_dashboard_main.panel;
+                            var v = p.formValue(this.vfield);
+                            if( v == null && p.data.settings[this.vfield] != null ) {
+                                v = p.data.settings[this.vfield];
+                            }
+                            if( v == null && this.vdefault != null ) {
+                                return this.vdefault;
+                            }
+                            if( this.vshow.includes(v) ) {
+                                return 'yes';
+                            }
+                            return 'no';
+                        };
+                    }
+                } */
+            }
+            p.widgets = rsp.widgets;
+            p.refresh();
+            p.show(cb);
+            p.setModuleOptions(p.data.widget_ref);
+        });
+    }
+    this.cell.save = function(cb) {
+        if( cb == null ) { cb = 'M.qruqsp_dashboard_main.cell.close();'; }
+        if( !this.checkForm() ) { return false; }
+        if( this.cell_id > 0 ) {
+            var c = this.serializeForm('no');
+            if( c != '' ) {
+                M.api.postJSONCb('qruqsp.dashboard.cellUpdate', {'tnid':M.curTenantID, 'cell_id':this.cell_id}, c, function(rsp) {
+                    if( rsp.stat != 'ok' ) {
+                        M.api.err(rsp);
+                        return false;
+                    }
+                    eval(cb);
+                });
+            } else {
+                eval(cb);
+            }
+        } else {
+            var c = this.serializeForm('yes');
+            M.api.postJSONCb('qruqsp.dashboard.cellAdd', {'tnid':M.curTenantID, 'panel_id':this.panel_id}, c, function(rsp) {
+                if( rsp.stat != 'ok' ) {
+                    M.api.err(rsp);
+                    return false;
+                }
+                M.qruqsp_dashboard_main.cell.cell_id = rsp.id;
+                eval(cb);
+            });
+        }
+    }
+    this.cell.remove = function() {
+        if( confirm('Are you sure you want to remove the widget?') ) {
+            M.api.getJSONCb('qruqsp.dashboard.cellDelete', {'tnid':M.curTenantID, 'cell_id':this.cell_id}, function(rsp) {
+                if( rsp.stat != 'ok' ) {
+                    M.api.err(rsp);
+                    return false;
+                }
+                M.qruqsp_dashboard_main.cell.close();
+            });
+        }
+    }
+    this.cell.nextButtonFn = function() {
+        if( this.nplist != null && this.nplist.indexOf('' + this.cell_id) < (this.nplist.length - 1) ) {
+            return 'M.qruqsp_dashboard_main.cell.save(\'M.qruqsp_dashboard_main.cell.open(null,' + this.nplist[this.nplist.indexOf('' + this.cell_id) + 1] + ');\');';
+        }
+        return null;
+    }
+    this.cell.prevButtonFn = function() {
+        if( this.nplist != null && this.nplist.indexOf('' + this.cell_id) > 0 ) {
+            return 'M.qruqsp_dashboard_main.cell.save(\'M.qruqsp_dashboard_main.cell.open(null,' + this.nplist[this.nplist.indexOf('' + this.cell_id) - 1] + ');\');';
+        }
+        return null;
+    }
+    this.cell.addButton('save', 'Save', 'M.qruqsp_dashboard_main.cell.save();');
+    this.cell.addClose('Cancel');
+    this.cell.addButton('next', 'Next');
+    this.cell.addLeftButton('prev', 'Prev');
 
     //
     // Start the app

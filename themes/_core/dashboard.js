@@ -3,7 +3,7 @@ var resetTimer = null;
 var slideshowTimer = null;
 var curPanel = null;
 function db_ge(p,i) {
-    return document.getElementById('panel-' + p['id'] + '-' + i);
+    return document.getElementById('widget-' + p.id + '-' + i);
 }
 function db_setInnerHtml(p,i,h) {
     var e = db_ge(p,i);
@@ -13,7 +13,7 @@ function db_setInnerHtml(p,i,h) {
 }
 function db_update() {
     clearTimeout(refreshTimer);
-    // Call the updater for the first panel
+    // Call the updater for the current panel
     if( curPanel != null && db_panels[curPanel].update != null && typeof(db_panels[curPanel].update) == 'function' ) {
         var c = '';
         if( db_panels[curPanel].update_args != null && typeof(db_panels[curPanel].update_args) == 'function' ) {
@@ -26,6 +26,9 @@ function db_update() {
                 var rsp = eval('('+x.responseText+')');
                 if( rsp != null && rsp.data != null && rsp.data[curPanel] != null ) {
                     db_panels[curPanel].update(rsp.data[curPanel]);
+                }
+                if( rsp.lastupdated != null ) {
+                    document.getElementById('lastupdated').innerHTML = rsp.lastupdated;
                 }
             }
             if( x.readyState > 2 && x.status >= 300 ) {
@@ -87,7 +90,38 @@ function db_advance() {
         }
     }
 }
+function db_resize() {
+    var s = document.getElementById('sizing');
+    s.innerHTML = '';
+
+    var h = window.innerHeight - 1;
+    var w = window.innerWidth - 1;
+    s.innerHTML += "table.panel { width: " + w + "px; }";
+    s.innerHTML += "table.panel { height: " + h + "px; }";
+    for(var i in db_panels) {
+        s.innerHTML += "table.panel-" + i + " td { "
+            + "width: " + Math.round(w/db_panels[i].cols) + "px; "
+            + "height: " + Math.round(h/db_panels[i].rows) + "px; "
+            + "}";
+        s.innerHTML += "table.panel-" + i + " td svg { "
+            + "width: " + Math.round(w/db_panels[i].cols) + "px; "
+            + "height: " + Math.round(h/db_panels[i].rows) + "px; "
+            + "}";
+        for(var j = 2; j <= db_panels[i].cols; j++) {
+            s.innerHTML += "table.panel-" + i + " td.w" + j + " {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
+            s.innerHTML += "table.panel-" + i + " td.w" + j + " .widget {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
+            s.innerHTML += "table.panel-" + i + " td.w" + j + " svg {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
+        }
+        for(var j = 2; j <= db_panels[i].rows; j++) {
+            s.innerHTML += "table.panel-" + i + " td.h" + j + " {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
+            s.innerHTML += "table.panel-" + i + " td.h" + j + " .widget {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
+            s.innerHTML += "table.panel-" + i + " td.h" + j + " svg {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
+        }
+    }
+}
 function db_init() {
+    setTimeout(db_resize, 500);
+    db_resize();
     // Initialize the panels
     for(var i in db_panels) {
         if( db_panels[i].init != null && typeof(db_panels[i].init) == 'function' ) {
@@ -107,11 +141,11 @@ function db_init() {
                 }
             }
         }
-        if( db_settings['slideshow-mode'] == null || db_settings['slideshow-mode'] != 'auto' 
-            || db_settings['slideshow-delay-seconds'] == null || db_settings['slideshow-delay-seconds'] > 15 
-            ) {
-            refreshTimer = setTimeout(db_update, 10005);
-        }
+    }
+    if( db_settings['slideshow-mode'] == null || db_settings['slideshow-mode'] != 'auto' 
+        || db_settings['slideshow-delay-seconds'] == null || db_settings['slideshow-delay-seconds'] > 15 
+        ) {
+        refreshTimer = setTimeout(db_update, 3005);
     }
 }
 window.onload = db_init();

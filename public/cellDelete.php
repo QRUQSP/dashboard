@@ -2,26 +2,26 @@
 //
 // Description
 // -----------
-// This method will delete an panel.
+// This method will delete an cell.
 //
 // Arguments
 // ---------
 // api_key:
 // auth_token:
-// tnid:            The ID of the tenant the panel is attached to.
-// panel_id:            The ID of the panel to be removed.
+// tnid:            The ID of the tenant the cell is attached to.
+// cell_id:            The ID of the cell to be removed.
 //
 // Returns
 // -------
 //
-function qruqsp_dashboard_panelDelete(&$ciniki) {
+function qruqsp_dashboard_cellDelete(&$ciniki) {
     //
     // Find all the required and optional arguments
     //
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'prepareArgs');
     $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
-        'panel_id'=>array('required'=>'yes', 'blank'=>'yes', 'name'=>'Panel'),
+        'cell_id'=>array('required'=>'yes', 'blank'=>'yes', 'name'=>'Cell'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
@@ -32,27 +32,27 @@ function qruqsp_dashboard_panelDelete(&$ciniki) {
     // Check access to tnid as owner
     //
     ciniki_core_loadMethod($ciniki, 'qruqsp', 'dashboard', 'private', 'checkAccess');
-    $rc = qruqsp_dashboard_checkAccess($ciniki, $args['tnid'], 'ciniki.dashboard.panelDelete');
+    $rc = qruqsp_dashboard_checkAccess($ciniki, $args['tnid'], 'ciniki.dashboard.cellDelete');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
 
     //
-    // Get the current settings for the panel
+    // Get the current settings for the cell
     //
     $strsql = "SELECT id, uuid "
-        . "FROM qruqsp_dashboard_panels "
+        . "FROM qruqsp_dashboard_cells "
         . "WHERE tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
-        . "AND id = '" . ciniki_core_dbQuote($ciniki, $args['panel_id']) . "' "
+        . "AND id = '" . ciniki_core_dbQuote($ciniki, $args['cell_id']) . "' "
         . "";
-    $rc = ciniki_core_dbHashQuery($ciniki, $strsql, 'ciniki.dashboard', 'panel');
+    $rc = ciniki_core_dbHashQuery($ciniki, $strsql, 'ciniki.dashboard', 'cell');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
-    if( !isset($rc['panel']) ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.17', 'msg'=>'Panel does not exist.'));
+    if( !isset($rc['cell']) ) {
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.34', 'msg'=>'Cell does not exist.'));
     }
-    $panel = $rc['panel'];
+    $cell = $rc['cell'];
 
     //
     // Check for any dependencies before deleting
@@ -62,27 +62,13 @@ function qruqsp_dashboard_panelDelete(&$ciniki) {
     // Check if any modules are currently using this object
     //
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'objectCheckUsed');
-    $rc = ciniki_core_objectCheckUsed($ciniki, $args['tnid'], 'qruqsp.dashboard.panel', $args['panel_id']);
+    $rc = ciniki_core_objectCheckUsed($ciniki, $args['tnid'], 'qruqsp.dashboard.cell', $args['cell_id']);
     if( $rc['stat'] != 'ok' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.18', 'msg'=>'Unable to check if the panel is still being used.', 'err'=>$rc['err']));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.35', 'msg'=>'Unable to check if the cell is still being used.', 'err'=>$rc['err']));
     }
     if( $rc['used'] != 'no' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.19', 'msg'=>'The panel is still in use. ' . $rc['msg']));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.36', 'msg'=>'The cell is still in use. ' . $rc['msg']));
     }
-
-    //
-    // Get the list of cells for the panel to delete
-    //
-    $strsql = "SELECT id, uuid "
-        . "FROM qruqsp_dashboard_cells "
-        . "WHERE panel_id = '" . ciniki_core_dbQuote($ciniki, $args['panel_id']) . "' "
-        . "AND tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
-        . "";
-    $rc = ciniki_core_dbHashQuery($ciniki, $strsql, 'qruqsp.dashboard', 'cell');
-    if( $rc['stat'] != 'ok' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.16', 'msg'=>'Unable to load cell', 'err'=>$rc['err']));
-    }
-    $cells = isset($rc['rows']) ? $rc['rows'] : array();
 
     //
     // Start transaction
@@ -99,21 +85,10 @@ function qruqsp_dashboard_panelDelete(&$ciniki) {
     }
 
     //
-    // Remove the cells
+    // Remove the cell
     //
-    foreach($cells as $cell) {
-        $rc = ciniki_core_objectDelete($ciniki, $args['tnid'], 'qruqsp.dashboard.cell', $cell['id'], $cell['uuid'], 0x04);
-        if( $rc['stat'] != 'ok' ) {
-            ciniki_core_dbTransactionRollback($ciniki, 'qruqsp.dashboard');
-            return $rc;
-        }
-    }
-
-    //
-    // Remove the panel
-    //
-    $rc = ciniki_core_objectDelete($ciniki, $args['tnid'], 'qruqsp.dashboard.panel',
-        $args['panel_id'], $panel['uuid'], 0x04);
+    $rc = ciniki_core_objectDelete($ciniki, $args['tnid'], 'qruqsp.dashboard.cell',
+        $args['cell_id'], $cell['uuid'], 0x04);
     if( $rc['stat'] != 'ok' ) {
         ciniki_core_dbTransactionRollback($ciniki, 'qruqsp.dashboard');
         return $rc;

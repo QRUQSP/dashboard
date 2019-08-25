@@ -52,3 +52,37 @@ div.nopanels {
     display: table-cell;
     font-size: 3em;
 }
+div.container {
+    width: 100%;
+    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    max-width: 100vw;
+}
+#lastupdated {
+    font-size: 0.75em;
+    color: #777;
+    display: inline-block;
+    position: absolute;
+    padding: 0.25em;
+    bottom: 0;
+    right: 0;
+}
+table.panel {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+}
+table.panel tr.spacing td {
+    height: 1px !important;
+}
+table.panel tr td.spacing {
+    width: 1px !important;
+}
+table.panel td {
+    vertical-align: middle;
+}
+table.panel td svg {
+    vertical-align: middle;
+}
