@@ -15,6 +15,7 @@ function qruqsp_dashboard_main() {
 //            'noData':'No dashboard found',
 //            },
         'dashboards':{'label':'Dashboards', 'type':'simplegrid', 'num_cols':2,
+            'cellClasses':['', 'alignright'],
             'noData':'No dashboard',
             'addTxt':'Add Dashboards',
             'addFn':'M.qruqsp_dashboard_main.dashboard.open(\'M.qruqsp_dashboard_main.menu.open();\',0,null);'
@@ -37,7 +38,7 @@ function qruqsp_dashboard_main() {
         if( s == 'dashboards' ) {
             switch(j) {
                 case 0: return d.name;
-                case 1: return '<a target="_blank" href="' + d.url + '">' + d.url + '</a>';
+                case 1: return '<a class="website" target="_blank" href="' + d.url + '">' + d.url + '</a>';
             }
         }
     }
