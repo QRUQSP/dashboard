@@ -23,6 +23,7 @@ function qruqsp_dashboard_panelGet($ciniki) {
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'panel_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Panel'),
         'dashboard_id'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Dashboard'),
+        'generate'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Generate Type'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
@@ -83,6 +84,48 @@ function qruqsp_dashboard_panelGet($ciniki) {
             'settings'=>array(
                 ),
         );
+    }
+
+    //
+    // Generate the panel for editing
+    //
+    elseif( isset($args['generate']) && $args['generate'] == 'editui' ) {
+        $strsql = "SELECT qruqsp_dashboard_panels.id, "
+            . "qruqsp_dashboard_panels.dashboard_id, "
+            . "qruqsp_dashboard_panels.title, "
+            . "qruqsp_dashboard_panels.sequence, "
+            . "qruqsp_dashboard_panels.rows, "
+            . "qruqsp_dashboard_panels.cols, "
+            . "qruqsp_dashboard_panels.settings "
+            . "FROM qruqsp_dashboard_panels "
+            . "WHERE qruqsp_dashboard_panels.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+            . "AND qruqsp_dashboard_panels.id = '" . ciniki_core_dbQuote($ciniki, $args['panel_id']) . "' "
+            . "";
+        ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
+        $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.dashboard', array(
+            array('container'=>'panels', 'fname'=>'id', 
+                'fields'=>array('dashboard_id', 'title', 'sequence', 'rows', 'cols', 'settings'),
+                ),
+            ));
+        if( $rc['stat'] != 'ok' ) {
+            return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.58', 'msg'=>'Panel not found', 'err'=>$rc['err']));
+        }
+        if( !isset($rc['panels'][0]) ) {
+            return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.59', 'msg'=>'Unable to find Panel'));
+        }
+        $panel = $rc['panels'][0];
+
+        ciniki_core_loadMethod($ciniki, 'qruqsp', 'dashboard', 'private', 'generate');
+        $rc = qruqsp_dashboard_generate($ciniki, $args['tnid'], array(
+            'action' => 'editui',
+            'dashboard_id' => $panel['dashboard_id'],
+            'panel_id' => $args['panel_id'],
+            ));
+        if( $rc['stat'] != 'ok' ) {
+            return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.56', 'msg'=>'', 'err'=>$rc['err']));
+        }
+
+        return $rc;
     }
 
     //

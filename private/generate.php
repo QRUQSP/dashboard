@@ -92,6 +92,12 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
         $panel_ids = explode(',', $_GET['update']);    
         $action = 'update';
     }
+    elseif( isset($args['action']) && $args['action'] == 'editui' ) {
+        $action = 'editui';
+        if( isset($args['panel_id']) && $args['panel_id'] != '' ) {
+            $panel_ids = array($args['panel_id']);
+        }
+    }
 
     //
     // Load the panels and cells
@@ -116,7 +122,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
             . ") "
         . "WHERE panels.dashboard_id = '" . ciniki_core_dbQuote($ciniki, $dashboard['id']) . "' "
         . "AND panels.tnid = '" . ciniki_core_dbQuote($ciniki, $tnid) . "' ";
-    if( $action == 'update' && count($panel_ids) > 0 ) {
+    if( ($action == 'update' || $action == 'editui') && count($panel_ids) > 0 ) {
         $strsql .= "AND panels.id IN (" . ciniki_core_dbQuoteIDs($ciniki, $panel_ids) . ") ";
     }
     $strsql .= "ORDER BY panels.sequence, cells.row, cells.col "
@@ -245,8 +251,8 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     $content .= '<meta name="apple-mobile-web-app-capable" content="yes" />';
     $content .= '<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />';
     $content .= '<link rel="apple-touch-icon" href="' . $dashboard['theme-url'] . '/icon.png" />';
-    $content .= '<link href="' . $dashboard['theme-url'] . '/fa5/css/fontawesome.png" />';
-    $content .= '<link href="' . $dashboard['theme-url'] . '/fa5/css/solid.png" />';
+//    $content .= '<link href="' . $dashboard['theme-url'] . '/fa5/css/fontawesome.png" />';
+//    $content .= '<link href="' . $dashboard['theme-url'] . '/fa5/css/solid.png" />';
     $content .= '<title>' . $dashboard['name'] . '</title>';
 
     //
@@ -270,18 +276,20 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     $js_panels = array();
     $js_cells = array();
     $js_panel_sequence = "var db_panel_order = [";
-    $html = '</head>';
+    $htmlstart = '</head>';
+    $html = '';
+    $htmlend = '';
     if( count($dashboard['panels']) > 1 ) {
-        $html .= '<body onresize="db_resize(); setTimeout(db_resize,250);"><div id="dbc" class="container" onclick="db_advance();">';
+        $htmlstart .= '<body onresize="db_resize(); setTimeout(db_resize,250);"><div id="dbc" class="container" onclick="db_advance();">';
     } else {
-        $html .= '<body onresize="db_resize(); setTimeout(db_resize,250);"><div id="dbc" class="container">';
+        $htmlstart .= '<body onresize="db_resize(); setTimeout(db_resize,250);"><div id="dbc" class="container">';
     }
 
     //
     // Check for no panels
     //
     if( count($dashboard['panels']) < 1 ) {
-        $html .= "<div class='nopanels'>This dashboard has not be setup</div>";
+        $htmlstart .= "<div class='nopanels'>This dashboard has not be setup</div>";
     }
 
     //
@@ -361,12 +369,12 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
         //
         // Setup the html for the panel and table inside
         //
-        $html .= "<div id='panel-{$panel['id']}' class='panel' display='{$display};'>"
-            . "<table class='panel panel-{$panel['id']}'><tbody>";
+        $html .= "<div id='dbpanel-{$panel['id']}' class='dbpanel' display='{$display};'>"
+            . "<table class='dbpanel dbpanel-{$panel['id']}'><tbody>";
         for($row = 1; $row <= $panel['rows']; $row++) {
             // Add spacer row
             if( $row == 1 ) {   
-                $html .= "<tr class='spacing'><td class='spacing'></td>";
+                $html .= "<tr class='spacing'><td></td>";
                 for($col = 1; $col <= $panel['cols']; $col++) {
                     $html .= "<td></td>";
                 }
@@ -396,14 +404,27 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
                         . ($cell['colspan'] > 1 ? " colspan='" . $cell['colspan'] . "'" : '')
                         . ">";
                     $rowstart = '';
-                    if( isset($cell['content']) ) {
+                    if( isset($action) && $action == 'editui' ) {
+                        $html .= "<div draggable='true' id='widget-{$cell['id']}' class='widget' "
+                            . "ondragstart='M.qruqsp_dashboard_main.panel.dragStart(event,{$cell['id']});' "
+                            . "onclick='M.qruqsp_dashboard_main.panel.editCell({$cell['id']});'>";
+                        $html .= print_r($cell['content'], true);
+                        $html .= "</div>";
+                    } elseif( isset($cell['content']) ) {
                         $html .= "<div id='widget-{$cell['id']}' class='widget'>";
                         $html .= $cell['content'];
                         $html .= "</div>";
                     }
                     $html .= "</td>";
                 } else {
-                    $html .= $rowstart . "<td></td>";
+                    if( isset($action) && $action == 'editui' ) {
+                        $html .= $rowstart . "<td ondrop='M.qruqsp_dashboard_main.panel.dropCell(event,{$row},{$col});' "
+                            . "ondragover='this.classList.add(\"over\");' "
+                            . "ondragleave='this.classList.remove(\"over\");' "
+                            . "onclick='M.qruqsp_dashboard_main.panel.addCell({$row},{$col});'><div class='empty'></div></td>";
+                    } else {
+                        $html .= $rowstart . "<td></td>";
+                    }
                     $rowstart = '';
                 }
             }
@@ -453,9 +474,13 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     if( file_exists($dashboard['core-dir'] . '/dashboard.js') ) {
         $js .= '<script type="text/javascript">' . file_get_contents($dashboard['core-dir'] . '/dashboard.js') . '</script>';
     }
-    $html .= '</div><div id="lastupdated">' . $dt->format('M d, Y H:i:s') . '</div></body>'
+    $htmlend .= '</div><div id="lastupdated">' . $dt->format('M d, Y H:i:s') . '</div></body>'
         . '</html>';
 
-    return array('stat'=>'ok', 'html'=>$content . $css . $js . $html);
+    if( isset($action) && $action == 'editui' ) {
+        return array('stat'=>'ok', 'panel' => $panel, 'html'=>$html);
+    }
+
+    return array('stat'=>'ok', 'html'=>$content . $css . $js . $htmlstart . $html . $htmlend);
 }
 ?>

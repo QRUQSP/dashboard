@@ -1,4 +1,4 @@
-@import url("fa/css/all.min.css");
+/* @import url("fa/css/all.min.css"); */
 
 html, body, div, span, 
 table, thead, tbody, tr, td, th, 
@@ -69,20 +69,20 @@ div.container {
     bottom: 0;
     right: 0;
 }
-table.panel {
+table.dbpanel {
     width: 100%;
     height: 100%;
     border-collapse: collapse;
 }
-table.panel tr.spacing td {
+table.dbpanel tr.spacing td {
     height: 1px !important;
 }
-table.panel tr td.spacing {
+table.dbpanel tr td.spacing {
     width: 1px !important;
 }
-table.panel td {
+table.dbpanel td {
     vertical-align: middle;
 }
-table.panel td svg {
+table.dbpanel td svg {
     vertical-align: middle;
 }

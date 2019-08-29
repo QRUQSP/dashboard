@@ -36,6 +36,15 @@ function qruqsp_dashboard_dashboardList($ciniki) {
     }
 
     //
+    // Setup the dashboard base url
+    //
+    if( isset($ciniki['config']['qruqsp.dashboard']['dashboard.url']) ) {
+        $dashboard_url = $ciniki['config']['qruqsp.dashboard']['dashboard.url'];
+    } else {    
+        $dashboard_url = 'http://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'] . '/dashboard';
+    }
+
+    //
     // Get the list of dashboards
     //
     $strsql = "SELECT qruqsp_dashboards.id, "
@@ -58,6 +67,7 @@ function qruqsp_dashboard_dashboardList($ciniki) {
         $dashboards = $rc['dashboards'];
         $dashboard_ids = array();
         foreach($dashboards as $iid => $dashboard) {
+            $dashboards[$iid]['url'] = $dashboard_url . '/' . $dashboard['permalink'];
             $dashboard_ids[] = $dashboard['id'];
         }
     } else {

@@ -22,6 +22,8 @@ function qruqsp_dashboard_cellGet($ciniki) {
     $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'cell_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Cell'),
+        'row'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Row'),
+        'col'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Col'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
@@ -62,8 +64,8 @@ function qruqsp_dashboard_cellGet($ciniki) {
         //
         $cell = array('id'=>0,
             'panel_id'=>'',
-            'row'=>'1',
-            'col'=>'1',
+            'row'=> (isset($args['row']) ? $args['row'] : '1'),
+            'col'=> (isset($args['col']) ? $args['col'] : '1'),
             'rowspan'=>'1',
             'colspan'=>'1',
             'widget_ref'=>'',
@@ -127,7 +129,6 @@ function qruqsp_dashboard_cellGet($ciniki) {
     // Set the default widget as the first one in the list
     //
     if( $args['cell_id'] == 0 ) {
-        error_log('test');
         reset($rsp['widgets']);
         $rsp['cell']['widget_ref'] = key($rsp['widgets']);
     }

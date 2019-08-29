@@ -17,7 +17,7 @@ function qruqsp_dashboard_widgets_moon1(&$ciniki, $tnid, $args) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbQuoteIDs');
 
     if( !isset($args['widget']['widget_ref']) ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.54', 'msg'=>'No dashboard widget specified'));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.60', 'msg'=>'No dashboard widget specified'));
     }
 
     if( !isset($args['widget']['content']) ) {

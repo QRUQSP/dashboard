@@ -55,8 +55,8 @@ function db_reset() {
     if( curPanel != db_panel_order[0] ) {
         curPanel = db_panel_order[0];
         db_update();
-        document.getElementById('panel-' + lastPanel).style.display = 'none';
-        document.getElementById('panel-' + curPanel).style.display = 'block';
+        document.getElementById('dbpanel-' + lastPanel).style.display = 'none';
+        document.getElementById('dbpanel-' + curPanel).style.display = 'block';
     }
 }
 function db_advance() { 
@@ -72,8 +72,8 @@ function db_advance() {
     }
     if( lastPanel != curPanel ) {
         db_update();
-        document.getElementById('panel-' + lastPanel).style.display = 'none';
-        document.getElementById('panel-' + curPanel).style.display = 'block';
+        document.getElementById('dbpanel-' + lastPanel).style.display = 'none';
+        document.getElementById('dbpanel-' + curPanel).style.display = 'block';
         if( db_settings['slideshow-mode'] != null && db_settings['slideshow-mode'] == 'manual' ) {
             if( db_settings['slideshow-reset-seconds'] != null && db_settings['slideshow-reset-seconds'] > 0 ) {
                 resetTimer = setTimeout(db_reset, (db_settings['slideshow-reset-seconds']*1000));
@@ -96,26 +96,26 @@ function db_resize() {
 
     var h = window.innerHeight - 1;
     var w = window.innerWidth - 1;
-    s.innerHTML += "table.panel { width: " + w + "px; }";
-    s.innerHTML += "table.panel { height: " + h + "px; }";
+    s.innerHTML += "table.dbpanel { width: " + w + "px; }";
+    s.innerHTML += "table.dbpanel { height: " + h + "px; }";
     for(var i in db_panels) {
-        s.innerHTML += "table.panel-" + i + " td { "
+        s.innerHTML += "table.dbpanel-" + i + " td { "
             + "width: " + Math.round(w/db_panels[i].cols) + "px; "
             + "height: " + Math.round(h/db_panels[i].rows) + "px; "
             + "}";
-        s.innerHTML += "table.panel-" + i + " td svg { "
+        s.innerHTML += "table.dbpanel-" + i + " td svg { "
             + "width: " + Math.round(w/db_panels[i].cols) + "px; "
             + "height: " + Math.round(h/db_panels[i].rows) + "px; "
             + "}";
         for(var j = 2; j <= db_panels[i].cols; j++) {
-            s.innerHTML += "table.panel-" + i + " td.w" + j + " {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
-            s.innerHTML += "table.panel-" + i + " td.w" + j + " .widget {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
-            s.innerHTML += "table.panel-" + i + " td.w" + j + " svg {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " .widget {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " svg {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
         }
         for(var j = 2; j <= db_panels[i].rows; j++) {
-            s.innerHTML += "table.panel-" + i + " td.h" + j + " {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
-            s.innerHTML += "table.panel-" + i + " td.h" + j + " .widget {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
-            s.innerHTML += "table.panel-" + i + " td.h" + j + " svg {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " .widget {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " svg {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
         }
     }
 }

@@ -5,16 +5,16 @@ function qruqsp_dashboard_main() {
     //
     // The panel to list the dashboard
     //
-    this.menu = new M.panel('dashboard', 'qruqsp_dashboard_main', 'menu', 'mc', 'medium', 'sectioned', 'qruqsp.dashboard.main.menu');
+    this.menu = new M.panel('Dashboard', 'qruqsp_dashboard_main', 'menu', 'mc', 'medium', 'sectioned', 'qruqsp.dashboard.main.menu');
     this.menu.data = {};
     this.menu.nplist = [];
     this.menu.sections = {
-        'search':{'label':'', 'type':'livesearchgrid', 'livesearchcols':1,
-            'cellClasses':[''],
-            'hint':'Search dashboard',
-            'noData':'No dashboard found',
-            },
-        'dashboards':{'label':'Dashboards', 'type':'simplegrid', 'num_cols':1,
+//        'search':{'label':'', 'type':'livesearchgrid', 'livesearchcols':1,
+//            'cellClasses':[''],
+//            'hint':'Search dashboard',
+//            'noData':'No dashboard found',
+//            },
+        'dashboards':{'label':'Dashboards', 'type':'simplegrid', 'num_cols':2,
             'noData':'No dashboard',
             'addTxt':'Add Dashboards',
             'addFn':'M.qruqsp_dashboard_main.dashboard.open(\'M.qruqsp_dashboard_main.menu.open();\',0,null);'
@@ -37,7 +37,13 @@ function qruqsp_dashboard_main() {
         if( s == 'dashboards' ) {
             switch(j) {
                 case 0: return d.name;
+                case 1: return '<a target="_blank" href="' + d.url + '">' + d.url + '</a>';
             }
+        }
+    }
+    this.menu.cellFn = function(s, i, j, d) {
+        if( s == 'dashboards' && j == 1 ) {
+            return 'event.stopPropagation();';
         }
     }
     this.menu.rowFn = function(s, i, d) {
@@ -114,7 +120,7 @@ function qruqsp_dashboard_main() {
         'panels':{'label':'Panels', 'type':'simplegrid', 'num_cols':1,
             'noData':'No panels added',
             'addTxt':'Add Panel',
-            'addFn':'M.qruqsp_dashboard_main.dashboard.save("M.qruqsp_dashboard_main.panel.open(\'M.qruqsp_dashboard_main.dashboard.open();\',0,M.qruqsp_dashboard_main.dashboard.dashboard_id,null);");',
+            'addFn':'M.qruqsp_dashboard_main.dashboard.save("M.qruqsp_dashboard_main.paneledit.open(\'M.qruqsp_dashboard_main.dashboard.open();\',0,M.qruqsp_dashboard_main.dashboard.dashboard_id,null);");',
             },
         '_buttons':{'label':'', 'buttons':{
             'save':{'label':'Save', 'fn':'M.qruqsp_dashboard_main.dashboard.save();'},
@@ -226,69 +232,149 @@ function qruqsp_dashboard_main() {
     this.dashboard.addLeftButton('prev', 'Prev');
 
     //
+    // The panel view
+    //
+    this.panel = new M.panel('Panel', 'qruqsp_dashboard_main', 'panel', 'mc', 'large', 'sectioned', 'qruqsp.dashboard.main.panel');
+    this.panel.data = null;
+    this.panel.panel_id = 0;
+    this.panel.sections = {
+        'html':{'label':'', 'hidelabel':'yes', 'type':'htmlcontent'},
+        };
+    this.panel.sectionData = function(s) {
+        if( s == 'html' ) {
+            return this.data[s];
+        }
+    }
+    this.panel.open = function(cb, pid, did, list) {
+        if( pid != null ) { this.panel_id = pid; }
+        if( did != null ) { this.dashboard_id = did; }
+        if( list != null ) { this.nplist = list; }
+        M.api.getJSONCb('qruqsp.dashboard.panelGet', {'tnid':M.curTenantID, 'panel_id':this.panel_id, 'generate':'editui'}, function(rsp) {
+            if( rsp.stat != 'ok' ) {
+                M.api.err(rsp);
+                return false;
+            }
+            var p = M.qruqsp_dashboard_main.panel;
+            p.data = rsp;
+            this.dashboard_id = p.data.panel.dashboard_id;
+            p.refresh();
+            p.show(cb);
+            p.resizeCells();
+        });
+    }
+    this.panel.editCell = function(cid) {
+        M.qruqsp_dashboard_main.cell.open('M.qruqsp_dashboard_main.panel.open();', cid);
+    }
+    this.panel.addCell = function(x,y) {
+        M.qruqsp_dashboard_main.cell.open('M.qruqsp_dashboard_main.panel.open();', 0, this.panel_id, null, x, y);
+    }
+    this.panel.dragStart = function(event, cid) {
+        event.dataTransfer.setData("cell_id", cid);
+    }
+    this.panel.dropCell = function(event,x,y) {
+        M.api.getJSONCb('qruqsp.dashboard.cellUpdate', {'tnid':M.curTenantID, 'cell_id':event.dataTransfer.getData("cell_id"), 'row':x, 'col':y}, function(rsp) {
+            if( rsp.stat != 'ok' ) {
+                M.api.err(rsp);
+                return false;
+            }
+            M.qruqsp_dashboard_main.panel.open();
+        });
+    }
+    this.panel.resizeCells = function() {
+        var s = M.gE(this.panelUID + '_sizing_css');
+        if( s == null ) {
+            s = document.createElement('style');
+            s.setAttribute('id', this.panelUID + '_sizing_css');
+            document.head.appendChild(s);
+        } else {
+            s.innerHTML = '';
+        }
+        var h = M.gE('dbpanel-' + this.panel_id).offsetHeight-2;
+        var w = M.gE('dbpanel-' + this.panel_id).offsetWidth-8-(this.data.panel.cols*2);
+        var h = (w/this.data.panel.cols) * this.data.panel.rows;
+        s.innerHTML += "#" + this.panelUID + "_section_html table.border > tbody > tr > td { background: #000; }";
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " {"
+            + "border-collapse: collapse; "
+            + "box-sizing: border-box; "
+            + "background: #000;"
+            + "width: " + w + "px; "
+            + "}; "
+        s.innerHTML += "table.dbpanel { width: " + w + "px;}";
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " td.over { "
+            + "background: #ccc; "
+            + "}";
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " td { "
+            + "width: " + Math.round(w/this.data.panel.cols) + "px; "
+            + "height: " + Math.round(h/this.data.panel.rows) + "px; "
+            + "border: 1px solid yellow;"
+            + "}";
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " td svg, "
+            + "table.dbpanel-" + this.panel_id + " td div.empty { "
+                + "width: " + Math.round(w/this.data.panel.cols) + "px; "
+                + "height: " + Math.round(h/this.data.panel.rows) + "px; "
+            + "}";
+        for(var j = 2; j <= this.data.panel.cols; j++) {
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " {width: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " .widget {width: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " svg {width: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
+        }
+        for(var j = 2; j <= this.data.panel.rows; j++) {
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " {height: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " .widget {height: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " svg {height: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
+        }
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " tr.spacing td {"
+            + "height: 1px !important; "
+            + "border-left: 0px solid #000; "
+            + "border-top: 0px solid #000; "
+            + "border-right: 0px solid #000; "
+            + "} "
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " tr.spacing td:first-child, "
+            + "table.dbpanel-" + this.panel_id + " tr td.spacing {"
+            + "width: 1px !important; "
+            + "border-left: 0px solid #000; "
+            + "border-top: 0px solid #000; "
+            + "border-bottom: 0px solid #000; "
+            + "} "
+    }
+    this.panel.addButton('edit', 'Edit', 'M.qruqsp_dashboard_main.paneledit.open("M.qruqsp_dashboard_main.panel.open();",M.qruqsp_dashboard_main.panel.panel_id);');
+    this.panel.addClose('Back');
+
+    //
     // The panel to edit Panel
     //
-    this.panel = new M.panel('Panel', 'qruqsp_dashboard_main', 'panel', 'mc', 'medium', 'sectioned', 'qruqsp.dashboard.main.panel');
-    this.panel.data = null;
-    this.panel.panels = null;
-    this.panel.panel_id = 0;
-    this.panel.dashboard_id = 0;
-    this.panel.nplist = [];
-    this.panel.sections = {
+    this.paneledit = new M.panel('Panel', 'qruqsp_dashboard_main', 'paneledit', 'mc', 'medium', 'sectioned', 'qruqsp.dashboard.main.paneledit');
+    this.paneledit.data = null;
+    this.paneledit.panels = null;
+    this.paneledit.panel_id = 0;
+    this.paneledit.dashboard_id = 0;
+    this.paneledit.nplist = [];
+    this.paneledit.sections = {
         'general':{'label':'', 'fields':{
             'title':{'label':'Title', 'required':'yes', 'type':'text'},
             'sequence':{'label':'Order', 'type':'text'},
             'cols':{'label':'Grid Columns', 'type':'text', 'size':'small'},
             'rows':{'label':'Grid Rows', 'type':'text', 'size':'small'},
             }},
-//        '_panel':{'label':'Choose the panel template', 'fields':{
-//            'panel_ref':{'label':'', 'hidelabel':'yes', 'required':'yes', 'type':'select', 
-//                'options':{}, //'complex_options':{'value':'value', 'name':'name'},
-//                'onchange':'M.qruqsp_dashboard_main.panel.updateModuleOptions();',
-//                },
-//            }},
-//        '_panel_options':{'label':'Options', 'visible':'hidden', 'fields':{
-//            }},
-        'cells':{'label':'Widgets', 'type':'simplegrid', 'num_cols':3, 
-            'headerValues':['Row', 'Col', 'Name'],
-            'addTxt':'Add Widget',
-            'addFn':'M.qruqsp_dashboard_main.panel.save("M.qruqsp_dashboard_main.cell.open(\'M.qruqsp_dashboard_main.panel.open();\',0,M.qruqsp_dashboard_main.panel.panel_id);");',
-            },
+//        'cells':{'label':'Widgets', 'type':'simplegrid', 'num_cols':3, 
+//            'headerValues':['Row', 'Col', 'Name'],
+//            'addTxt':'Add Widget',
+//            'addFn':'M.qruqsp_dashboard_main.paneledit.save("M.qruqsp_dashboard_main.cell.open(\'M.qruqsp_dashboard_main.paneledit.open();\',0,M.qruqsp_dashboard_main.paneledit.panel_id);");',
+//            },
         '_buttons':{'label':'', 'buttons':{
-            'save':{'label':'Save', 'fn':'M.qruqsp_dashboard_main.panel.save();'},
+            'save':{'label':'Save', 'fn':'M.qruqsp_dashboard_main.paneledit.save();'},
             'delete':{'label':'Delete', 
-                'visible':function() {return M.qruqsp_dashboard_main.panel.panel_id > 0 ? 'yes' : 'no'; },
-                'fn':'M.qruqsp_dashboard_main.panel.remove();'},
+                'visible':function() {return M.qruqsp_dashboard_main.paneledit.panel_id > 0 ? 'yes' : 'no'; },
+                'fn':'M.qruqsp_dashboard_main.paneledit.remove();'},
             }},
         };
-    this.panel.fieldValue = function(s, i, d) { 
-//        if( s == '_panel_options' ) {
-//            return this.data.settings[i];
-//        }
+    this.paneledit.fieldValue = function(s, i, d) { 
         return this.data[i]; 
     }
-    this.panel.fieldHistoryArgs = function(s, i) {
+    this.paneledit.fieldHistoryArgs = function(s, i) {
         return {'method':'qruqsp.dashboard.panelHistory', 'args':{'tnid':M.curTenantID, 'panel_id':this.panel_id, 'field':i}};
     }
-/*    this.panel.updateModuleOptions = function() {
-        this.setModuleOptions(this.formValue('panel_ref'));
-    }
-    this.panel.setModuleOptions = function(option) {
-        this.sections._panel_options.fields = {};
-        if( this.panels[option] != null && this.panels[option].options != null ) {
-            this.sections._panel_options.visible = 'yes';
-            this.sections._panel_options.fields = this.panels[option].options;
-        } else {
-            this.sections._panel_options.visible = 'hidden';
-        }
-        this.refreshSection('_panel_options');
-    }
-    this.panel.refreshFields = function(fields) {
-        for(var i in fields) {
-            this.showHideFormField('_panel_options', fields[i]);
-        }
-    } */
-    this.panel.cellValue = function(s, i, j, d) {
+    this.paneledit.cellValue = function(s, i, j, d) {
         if( s == 'cells' ) {
             switch(j) {
                 case 0: return d.row;
@@ -297,12 +383,12 @@ function qruqsp_dashboard_main() {
             }
         }
     }
-    this.panel.rowFn = function(s, i, d) {
+    this.paneledit.rowFn = function(s, i, d) {
         if( s == 'cells' ) {
-            return 'M.qruqsp_dashboard_main.cell.open(\'M.qruqsp_dashboard_main.panel.open();\',\'' + d.id + '\',0,M.qruqsp_dashboard_main.panel.nplist);';
+            return 'M.qruqsp_dashboard_main.cell.open(\'M.qruqsp_dashboard_main.paneledit.open();\',\'' + d.id + '\',0,M.qruqsp_dashboard_main.paneledit.nplist);';
         }
     }
-    this.panel.open = function(cb, pid, did, list) {
+    this.paneledit.open = function(cb, pid, did, list) {
         if( pid != null ) { this.panel_id = pid; }
         if( did != null ) { this.dashboard_id = did; }
         if( list != null ) { this.nplist = list; }
@@ -311,38 +397,14 @@ function qruqsp_dashboard_main() {
                 M.api.err(rsp);
                 return false;
             }
-            var p = M.qruqsp_dashboard_main.panel;
+            var p = M.qruqsp_dashboard_main.paneledit;
             p.data = rsp.panel;
-/*            p.sections._panel.fields.panel_ref.options = [];
-            for(var i in rsp.panels) {
-                p.sections._panel.fields.panel_ref.options[i] = rsp.panels[i].name;
-                for(var j in rsp.panels[i].options) {
-                    if( rsp.panels[i].options[j].vfield != null && rsp.panels[i].options[j].vshow != null ) {
-                        rsp.panels[i].options[j].visible = function() {
-                            var p = M.qruqsp_dashboard_main.panel;
-                            var v = p.formValue(this.vfield);
-                            if( v == null && p.data.settings[this.vfield] != null ) {
-                                v = p.data.settings[this.vfield];
-                            }
-                            if( v == null && this.vdefault != null ) {
-                                return this.vdefault;
-                            }
-                            if( this.vshow.includes(v) ) {
-                                return 'yes';
-                            }
-                            return 'no';
-                        };
-                    }
-                }
-            }
-            p.panels = rsp.panels; */
             p.refresh();
             p.show(cb);
-//            p.setModuleOptions(p.data.panel_ref);
         });
     }
-    this.panel.save = function(cb) {
-        if( cb == null ) { cb = 'M.qruqsp_dashboard_main.panel.close();'; }
+    this.paneledit.save = function(cb) {
+        if( cb == null ) { cb = 'M.qruqsp_dashboard_main.paneledit.close();'; }
         if( !this.checkForm() ) { return false; }
         if( this.panel_id > 0 ) {
             var c = this.serializeForm('no');
@@ -364,38 +426,38 @@ function qruqsp_dashboard_main() {
                     M.api.err(rsp);
                     return false;
                 }
-                M.qruqsp_dashboard_main.panel.panel_id = rsp.id;
-                eval(cb);
+                M.qruqsp_dashboard_main.paneledit.panel_id = rsp.id;
+                M.qruqsp_dashboard_main.panel.open(this.cb, rsp.id, this.dashboard_id, null);
             });
         }
     }
-    this.panel.remove = function() {
+    this.paneledit.remove = function() {
         if( confirm('Are you sure you want to remove panel?') ) {
             M.api.getJSONCb('qruqsp.dashboard.panelDelete', {'tnid':M.curTenantID, 'panel_id':this.panel_id}, function(rsp) {
                 if( rsp.stat != 'ok' ) {
                     M.api.err(rsp);
                     return false;
                 }
-                M.qruqsp_dashboard_main.panel.close();
+                M.qruqsp_dashboard_main.paneledit.close();
             });
         }
     }
-    this.panel.nextButtonFn = function() {
+    this.paneledit.nextButtonFn = function() {
         if( this.nplist != null && this.nplist.indexOf('' + this.panel_id) < (this.nplist.length - 1) ) {
-            return 'M.qruqsp_dashboard_main.panel.save(\'M.qruqsp_dashboard_main.panel.open(null,' + this.nplist[this.nplist.indexOf('' + this.panel_id) + 1] + ');\');';
+            return 'M.qruqsp_dashboard_main.paneledit.save(\'M.qruqsp_dashboard_main.paneledit.open(null,' + this.nplist[this.nplist.indexOf('' + this.panel_id) + 1] + ');\');';
         }
         return null;
     }
-    this.panel.prevButtonFn = function() {
+    this.paneledit.prevButtonFn = function() {
         if( this.nplist != null && this.nplist.indexOf('' + this.panel_id) > 0 ) {
-            return 'M.qruqsp_dashboard_main.panel.save(\'M.qruqsp_dashboard_main.panel.open(null,' + this.nplist[this.nplist.indexOf('' + this.panel_id) - 1] + ');\');';
+            return 'M.qruqsp_dashboard_main.paneledit.save(\'M.qruqsp_dashboard_main.paneledit.open(null,' + this.nplist[this.nplist.indexOf('' + this.panel_id) - 1] + ');\');';
         }
         return null;
     }
-    this.panel.addButton('save', 'Save', 'M.qruqsp_dashboard_main.panel.save();');
-    this.panel.addClose('Cancel');
-    this.panel.addButton('next', 'Next');
-    this.panel.addLeftButton('prev', 'Prev');
+    this.paneledit.addButton('save', 'Save', 'M.qruqsp_dashboard_main.paneledit.save();');
+    this.paneledit.addClose('Cancel');
+    this.paneledit.addButton('next', 'Next');
+    this.paneledit.addLeftButton('prev', 'Prev');
 
     //
     // The panel to edit cell
@@ -413,13 +475,13 @@ function qruqsp_dashboard_main() {
                 'onchange':'M.qruqsp_dashboard_main.cell.updateOptions();',
                 },
             }},
-        'position':{'label':'Position', 'fields':{
+        'position':{'label':'Position', 'visible':'hidden', 'fields':{
             'row':{'label':'Row', 'type':'text', 'size':'small'},
             'col':{'label':'Column', 'type':'text', 'size':'small'},
             }},
         'size':{'label':'Size', 'fields':{
-            'colspan':{'label':'Columns', 'type':'text', 'size':'small'},
             'rowspan':{'label':'Rows', 'type':'text', 'size':'small'},
+            'colspan':{'label':'Columns', 'type':'text', 'size':'small'},
             }},
         '_options':{'label':'Options', 'visible':'hidden', 'fields':{
             }},
@@ -457,11 +519,14 @@ function qruqsp_dashboard_main() {
             this.showHideFormField('_options', fields[i]);
         }
     }
-    this.cell.open = function(cb, cid, pid, list) {
+    this.cell.open = function(cb, cid, pid, list, x, y) {
         if( cid != null ) { this.cell_id = cid; }
         if( pid != null ) { this.panel_id = pid; }
         if( list != null ) { this.nplist = list; }
-        M.api.getJSONCb('qruqsp.dashboard.cellGet', {'tnid':M.curTenantID, 'cell_id':this.cell_id, 'panel_id':this.panel_id}, function(rsp) {
+        var args = {'tnid':M.curTenantID, 'cell_id':this.cell_id, 'panel_id':this.panel_id};
+        if( x != null ) { args['row'] = x; }
+        if( y != null ) { args['col'] = y; }
+        M.api.getJSONCb('qruqsp.dashboard.cellGet', args, function(rsp) {
             if( rsp.stat != 'ok' ) {
                 M.api.err(rsp);
                 return false;
