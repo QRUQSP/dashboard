@@ -237,6 +237,7 @@ function qruqsp_dashboard_main() {
     this.panel = new M.panel('Panel', 'qruqsp_dashboard_main', 'panel', 'mc', 'large', 'sectioned', 'qruqsp.dashboard.main.panel');
     this.panel.data = null;
     this.panel.panel_id = 0;
+    this.refreshTimer = null;
     this.panel.sections = {
         'html':{'label':'', 'hidelabel':'yes', 'type':'htmlcontent'},
         };
@@ -356,11 +357,6 @@ function qruqsp_dashboard_main() {
             'cols':{'label':'Grid Columns', 'type':'text', 'size':'small'},
             'rows':{'label':'Grid Rows', 'type':'text', 'size':'small'},
             }},
-//        'cells':{'label':'Widgets', 'type':'simplegrid', 'num_cols':3, 
-//            'headerValues':['Row', 'Col', 'Name'],
-//            'addTxt':'Add Widget',
-//            'addFn':'M.qruqsp_dashboard_main.paneledit.save("M.qruqsp_dashboard_main.cell.open(\'M.qruqsp_dashboard_main.paneledit.open();\',0,M.qruqsp_dashboard_main.paneledit.panel_id);");',
-//            },
         '_buttons':{'label':'', 'buttons':{
             'save':{'label':'Save', 'fn':'M.qruqsp_dashboard_main.paneledit.save();'},
             'delete':{'label':'Delete', 
