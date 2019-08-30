@@ -417,7 +417,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
                         $html .= "<div draggable='true' id='widget-{$cell['id']}' class='widget' "
                             . "ondragstart='M.qruqsp_dashboard_main.panel.dragStart(event,{$cell['id']});' "
                             . "onclick='M.qruqsp_dashboard_main.panel.editCell({$cell['id']});'>";
-                        $html .= print_r($cell['content'], true);
+                        $html .= $cell['content'];
                         $html .= "</div>";
                     } elseif( isset($cell['content']) ) {
                         $html .= "<div id='widget-{$cell['id']}' class='widget'>";
