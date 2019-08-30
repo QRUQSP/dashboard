@@ -39,17 +39,23 @@ function qruqsp_dashboard_widgets_moon1(&$ciniki, $tnid, $args) {
         return $rc;
     }
     $intl_timezone = $rc['settings']['intl-default-timezone'];
-    
+
+    //
+    // Load the moon phase calculator library
+    //
+    require_once($ciniki['config']['ciniki.core']['root_dir'] . '/qruqsp-mods/dashboard/lib/MoonPhase.php');
+
     //
     // Setup current time
     //
     $dt = new DateTime('now', new DateTimezone($intl_timezone));
-    $phase = ($dt->format('U') - 614100) % 2551443;
-    $phase = ($phase/(24*3600));
-    // The current phase will be between 0 and 28
-    // Convert to between 0 - 360
-    // 29.53 is the period of the moon in days
-    $deg = $phase * (360/29.53);
+
+    //
+    // Run Calculations
+    //
+    $mn = new Solaris\MoonPhase($dt);
+    $deg = $mn->phase_deg();
+
     if( $deg >= 360 ) {
         $deg = 0;
     }
