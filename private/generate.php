@@ -325,7 +325,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
         //
         if( isset($panel['cells']) ) {
             foreach($panel['cells'] as $cid => $cell) {
-                if( !isset($grid[$cell['row']][$cell['col']]) ) {
+                if( !isset($cell['row']) || !isset($cell['col']) || !isset($grid[$cell['row']][$cell['col']]) ) {
                     continue;    
                 }
                 if( isset($cell['css']) && $cell['css'] != '' ) {
