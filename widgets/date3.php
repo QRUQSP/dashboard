@@ -12,7 +12,7 @@
 // Returns
 // ---------
 // 
-function qruqsp_dashboard_widgets_date1(&$ciniki, $tnid, $args) {
+function qruqsp_dashboard_widgets_date3(&$ciniki, $tnid, $args) {
 
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbQuoteIDs');
 
@@ -45,7 +45,6 @@ function qruqsp_dashboard_widgets_date1(&$ciniki, $tnid, $args) {
     //
     $dt = new DateTime('now', new DateTimezone($intl_timezone));
 
-    $widget['data']['date'] = strtoupper($dt->format('M j'));
     if( isset($widget['settings']['24hour']) && $widget['settings']['24hour'] == 'yes' ) {
         $widget['data']['time'] = $dt->format('H:i');
     } else {
@@ -59,12 +58,8 @@ function qruqsp_dashboard_widgets_date1(&$ciniki, $tnid, $args) {
     //
     // Setup the svg
     //
-    $widget['content'] .= '<svg viewBox="0 0 200 150">';
-    $widget['content'] .= "<text x='100' y='48' width='180' height='74' font-size='54' fill='#ccc'>"
-        . "<tspan id='widget-{$widget['id']}-date' alignment-baseline='middle' text-anchor='middle'>"
-        . $widget['data']['date']
-        . "</tspan></text>";
-    $widget['content'] .= "<text x='100' y='114' width='180' height='74' font-size='80' fill='#fff'>"
+    $widget['content'] .= '<svg viewBox="0 0 300 100">';
+    $widget['content'] .= "<text x='150' y='61' width='280' height='95' font-size='110' fill='#fff'>"
         . "<tspan id='widget-{$widget['id']}-time' alignment-baseline='middle' text-anchor='middle'>"
         . $widget['data']['time']
         . "</tspan></text>";

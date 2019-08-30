@@ -29,7 +29,7 @@ function qruqsp_dashboard_loadCell(&$ciniki, $tnid, $action, $cell) {
                 ));
             if( $rc['stat'] != 'ok' ) {
                 return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.51', 'msg'=>'Unable to load widget', 'err'=>$rc['err']));
-            }
+            } 
             $cell['content'] = $rc['widget']['content'];
             $cell['css'] = $rc['widget']['css'];
             $cell['js'] = $rc['widget']['js'];

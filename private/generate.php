@@ -193,7 +193,16 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
                 if( isset($cell['widget_ref']) ) {
                     $rc = qruqsp_dashboard_loadCell($ciniki, $tnid, $action, $cell);
                     if( $rc['stat'] != 'ok' ) {
-                        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.53', 'msg'=>'Panel', 'err'=>$rc['err']));
+                        //
+                        // If error, return dummy information so dashboard doesn't break
+                        //
+                        $dashboard['panels'][$pid]['cells'][$cid] = array(
+                            'id' => $cell['id'],
+                            'content' => '',
+                            'css' => '',
+                            'js' => '',
+                            'data' => array(),
+                            );
                     }
                     if( isset($rc['cell']) ) {
                         $dashboard['panels'][$pid]['cells'][$cid] = $rc['cell'];

@@ -27,6 +27,24 @@ function qruqsp_dashboard_hooks_dashboardWidgets(&$ciniki, $tnid, $args) {
                 ),
             ),
         ),
+        'qruqsp.dashboard.date2' => array(
+            'name' => 'Date',
+            'category' => 'Misc',
+            'options' => array(
+            ),
+        ),
+        'qruqsp.dashboard.date3' => array(
+            'name' => 'Time',
+            'category' => 'Misc',
+            'options' => array(
+                '24hour' => array(
+                    'label' => '24 Hour Time', 
+                    'type' => 'toggle',
+                    'default' => 'no',
+                    'toggles' => array('no'=>'No', 'yes'=>'Yes'),
+                ),
+            ),
+        ),
         'qruqsp.dashboard.moon1' => array(
             'name' => 'Moon Phase',
             'category' => 'Misc',
