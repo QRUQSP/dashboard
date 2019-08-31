@@ -38,13 +38,13 @@ function qruqsp_dashboard_main() {
         if( s == 'dashboards' ) {
             switch(j) {
                 case 0: return d.name;
-                case 1: return '<a class="website" target="_blank" href="' + d.url + '">' + d.url + '</a>';
+                case 1: return '<a class="website" target="_blank" onclick="event.stopPropagation(); return true;" href="' + d.url + '">' + d.url + '</a>';
             }
         }
     }
     this.menu.cellFn = function(s, i, j, d) {
         if( s == 'dashboards' && j == 1 ) {
-            return 'event.stopPropagation();';
+//            return 'event.stopPropagation();';
         }
     }
     this.menu.rowFn = function(s, i, d) {

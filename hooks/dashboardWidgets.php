@@ -45,6 +45,18 @@ function qruqsp_dashboard_hooks_dashboardWidgets(&$ciniki, $tnid, $args) {
                 ),
             ),
         ),
+        'qruqsp.dashboard.sunup1' => array(
+            'name' => 'Sun/Moon Rise & Set Times',
+            'category' => 'Misc',
+            'options' => array(
+                '24hour' => array(
+                    'label' => '24 Hour Time', 
+                    'type' => 'toggle',
+                    'default' => 'no',
+                    'toggles' => array('no'=>'No', 'yes'=>'Yes'),
+                ),
+            ),
+        ),
         'qruqsp.dashboard.moon1' => array(
             'name' => 'Moon Phase',
             'category' => 'Misc',

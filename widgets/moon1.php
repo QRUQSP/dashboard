@@ -56,6 +56,8 @@ function qruqsp_dashboard_widgets_moon1(&$ciniki, $tnid, $args) {
     $mn = new Solaris\MoonPhase($dt);
     $deg = $mn->phase_deg();
 
+    error_log($deg . '::' . $mn->phase());
+
     if( $deg >= 360 ) {
         $deg = 0;
     }
