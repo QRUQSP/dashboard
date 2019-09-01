@@ -68,18 +68,6 @@ function qruqsp_dashboard_widgets_sunup1(&$ciniki, $tnid, $args) {
         $label_font_size = 25;
     }
 
-/*$sunTimes = $sc->getSunTimes();
-print_r($sunTimes);
-
-$moon = $sc->getMoonPosition($dt);
-print_r($moon);
-$moon = $sc->getMoonIllumination();
-$moon['deg'] = $moon['phase'] * 360;
-print_r($moon);
-$moon = $sc->getMoonTimes(false);
-print_r($moon); */
-
-
     if( isset($args['action']) && $args['action'] == 'update' ) {
         return array('stat'=>'ok', 'widget'=>$widget);
     }
@@ -130,6 +118,12 @@ print_r($moon); */
             . "}"
             . "if( data.sunset != null ) {"
                 . "db_setInnerHtml(this, 'sunset', data.sunset);"
+            . "}"
+            . "if( data.moonrise != null ) {"
+                . "db_setInnerHtml(this, 'moonrise', data.moonrise);"
+            . "}"
+            . "if( data.moonset != null ) {"
+                . "db_setInnerHtml(this, 'moonset', data.moonset);"
             . "}"
             . "};",
         'init' => "function() {};",
