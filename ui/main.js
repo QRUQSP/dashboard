@@ -292,7 +292,7 @@ function qruqsp_dashboard_main() {
             s.innerHTML = '';
         }
         var h = M.gE('dbpanel-' + this.panel_id).offsetHeight-2;
-        var w = M.gE('dbpanel-' + this.panel_id).offsetWidth-8-(this.data.panel.cols*2);
+        var w = M.gE('dbpanel-' + this.panel_id).offsetWidth-8-(this.data.panel.numcols*2);
         var h = (w/this.data.panel.numcols) * this.data.panel.numrows;
         s.innerHTML += "#" + this.panelUID + "_section_html table.border > tbody > tr > td { background: #000; }";
         s.innerHTML += "table.dbpanel-" + this.panel_id + " {"
@@ -316,14 +316,14 @@ function qruqsp_dashboard_main() {
                 + "height: " + Math.round(h/this.data.panel.numrows) + "px; "
             + "}";
         for(var j = 2; j <= this.data.panel.numcols; j++) {
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " {width: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " .widget {width: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " svg {width: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " {width: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " .widget {width: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " svg {width: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
         }
         for(var j = 2; j <= this.data.panel.numrows; j++) {
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " {height: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " .widget {height: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " svg {height: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " {height: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " .widget {height: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " svg {height: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
         }
         s.innerHTML += "table.dbpanel-" + this.panel_id + " tr.spacing td {"
             + "height: 1px !important; "
