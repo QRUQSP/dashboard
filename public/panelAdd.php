@@ -23,8 +23,8 @@ function qruqsp_dashboard_panelAdd(&$ciniki) {
         'dashboard_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Dashboard'),
         'title'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Title'),
         'sequence'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Order'),
-        'rows'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Rows'),
-        'cols'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Columns'),
+        'numrows'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Rows'),
+        'numcols'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Columns'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;

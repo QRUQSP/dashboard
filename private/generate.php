@@ -105,8 +105,8 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     $strsql = "SELECT panels.id, "
         . "panels.title, "
         . "panels.sequence, "
-        . "panels.rows, "
-        . "panels.cols, "
+        . "panels.numrows, "
+        . "panels.numcols, "
         . "panels.settings, "
         . "cells.id AS cell_id, "
         . "cells.row, "
@@ -128,7 +128,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
     $strsql .= "ORDER BY panels.sequence, cells.row, cells.col "
         . "";
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.dashboard', array(
-        array('container'=>'panels', 'fname'=>'id', 'fields'=>array('id', 'title', 'sequence', 'rows', 'cols', 'settings')),
+        array('container'=>'panels', 'fname'=>'id', 'fields'=>array('id', 'title', 'sequence', 'numrows', 'numcols', 'settings')),
         array('container'=>'cells', 'fname'=>'cell_id', 'fields'=>array('id'=>'cell_id', 'row', 'col', 'rowspan', 'colspan', 'widget_ref', 'settings'=>'cell_settings')),
         ));
     if( $rc['stat'] != 'ok' ) {
@@ -312,9 +312,9 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
         // Setup the grid that will form the html table
         //
         $grid = array();
-        for($row = 1; $row <= $panel['rows']; $row++) {
+        for($row = 1; $row <= $panel['numrows']; $row++) {
             $grid[$row] = array();
-            for($col = 1; $col <= $panel['cols']; $col++) {
+            for($col = 1; $col <= $panel['numcols']; $col++) {
                 $grid[$row][$col] = array(
                     'type' => 'empty',
                     );
@@ -380,11 +380,11 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
         //
         $html .= "<div id='dbpanel-{$panel['id']}' class='dbpanel' display='{$display};'>"
             . "<table class='dbpanel dbpanel-{$panel['id']}'><tbody>";
-        for($row = 1; $row <= $panel['rows']; $row++) {
+        for($row = 1; $row <= $panel['numrows']; $row++) {
             // Add spacer row
             if( $row == 1 ) {   
                 $html .= "<tr class='spacing'><td></td>";
-                for($col = 1; $col <= $panel['cols']; $col++) {
+                for($col = 1; $col <= $panel['numcols']; $col++) {
                     $html .= "<td></td>";
                 }
                 $html .= "</tr>";
@@ -394,7 +394,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
             // row is only added if one or more cells are visible
             //
             $rowstart = "<tr><td class='spacing'></td>";
-            for($col = 1; $col <= $panel['cols']; $col++) {
+            for($col = 1; $col <= $panel['numcols']; $col++) {
                 if( $grid[$row][$col]['type'] == 'hidden' ) {
                     continue;
                 }
@@ -451,8 +451,8 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
             'id' => $panel['id'],
             'title' => $panel['title'],
             'sequence' => $panel['sequence'],
-            'rows' => $panel['rows'],
-            'cols' => $panel['cols'],
+            'numrows' => $panel['numrows'],
+            'numcols' => $panel['numcols'],
             'settings' => $panel['settings'],
             'data' => $panel['data'],
             );

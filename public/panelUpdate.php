@@ -19,8 +19,8 @@ function qruqsp_dashboard_panelUpdate(&$ciniki) {
         'panel_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Panel'),
         'title'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Title'),
         'sequence'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Order'),
-        'rows'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Rows'),
-        'cols'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Columns'),
+        'numrows'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Rows'),
+        'numcols'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Columns'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;

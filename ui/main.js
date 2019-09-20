@@ -293,7 +293,7 @@ function qruqsp_dashboard_main() {
         }
         var h = M.gE('dbpanel-' + this.panel_id).offsetHeight-2;
         var w = M.gE('dbpanel-' + this.panel_id).offsetWidth-8-(this.data.panel.cols*2);
-        var h = (w/this.data.panel.cols) * this.data.panel.rows;
+        var h = (w/this.data.panel.numcols) * this.data.panel.numrows;
         s.innerHTML += "#" + this.panelUID + "_section_html table.border > tbody > tr > td { background: #000; }";
         s.innerHTML += "table.dbpanel-" + this.panel_id + " {"
             + "border-collapse: collapse; "
@@ -306,21 +306,21 @@ function qruqsp_dashboard_main() {
             + "background: #ccc; "
             + "}";
         s.innerHTML += "table.dbpanel-" + this.panel_id + " td { "
-            + "width: " + Math.round(w/this.data.panel.cols) + "px; "
-            + "height: " + Math.round(h/this.data.panel.rows) + "px; "
+            + "width: " + Math.round(w/this.data.panel.numcols) + "px; "
+            + "height: " + Math.round(h/this.data.panel.numrows) + "px; "
             + "border: 1px solid yellow;"
             + "}";
         s.innerHTML += "table.dbpanel-" + this.panel_id + " td svg, "
             + "table.dbpanel-" + this.panel_id + " td div.empty { "
-                + "width: " + Math.round(w/this.data.panel.cols) + "px; "
-                + "height: " + Math.round(h/this.data.panel.rows) + "px; "
+                + "width: " + Math.round(w/this.data.panel.numcols) + "px; "
+                + "height: " + Math.round(h/this.data.panel.numrows) + "px; "
             + "}";
-        for(var j = 2; j <= this.data.panel.cols; j++) {
+        for(var j = 2; j <= this.data.panel.numcols; j++) {
             s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " {width: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
             s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " .widget {width: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
             s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " svg {width: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
         }
-        for(var j = 2; j <= this.data.panel.rows; j++) {
+        for(var j = 2; j <= this.data.panel.numrows; j++) {
             s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " {height: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
             s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " .widget {height: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
             s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " svg {height: " + Math.round((w/this.data.panel.cols)*j) + "px;}";
@@ -355,8 +355,8 @@ function qruqsp_dashboard_main() {
         'general':{'label':'', 'fields':{
             'title':{'label':'Title', 'required':'yes', 'type':'text'},
             'sequence':{'label':'Order', 'type':'text'},
-            'cols':{'label':'Grid Columns', 'type':'text', 'size':'small'},
-            'rows':{'label':'Grid Rows', 'type':'text', 'size':'small'},
+            'numcols':{'label':'Grid Columns', 'type':'text', 'size':'small'},
+            'numrows':{'label':'Grid Rows', 'type':'text', 'size':'small'},
             }},
         '_buttons':{'label':'', 'buttons':{
             'save':{'label':'Save', 'fn':'M.qruqsp_dashboard_main.paneledit.save();'},
