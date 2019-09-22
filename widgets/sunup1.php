@@ -57,14 +57,14 @@ function qruqsp_dashboard_widgets_sunup1(&$ciniki, $tnid, $args) {
     if( isset($widget['settings']['24hour']) && $widget['settings']['24hour'] == 'yes' ) {
         $widget['data']['sunrise'] = $sun_times['sunrise']->format('H:i');
         $widget['data']['sunset'] = $sun_times['sunset']->format('H:i');
-        $widget['data']['moonrise'] = $moon_times['moonrise']->format('H:i');
-        $widget['data']['moonset'] = $moon_times['moonset']->format('H:i');
+        $widget['data']['moonrise'] = isset($moon_times['moonrise']) ? $moon_times['moonrise']->format('H:i') : 'NONE';
+        $widget['data']['moonset'] = isset($moon_times['moonset']) ? $moon_times['moonset']->format('H:i') : 'NONE';
         $label_font_size = 35;
     } else {
         $widget['data']['sunrise'] = $sun_times['sunrise']->format('g:ia');
         $widget['data']['sunset'] = $sun_times['sunset']->format('g:ia');
-        $widget['data']['moonrise'] = $moon_times['moonrise']->format('g:ia');
-        $widget['data']['moonset'] = $moon_times['moonset']->format('g:ia');
+        $widget['data']['moonrise'] = isset($moon_times['moonrise']) ? $moon_times['moonrise']->format('g:ia') : 'NONE';
+        $widget['data']['moonset'] = isset($moon_times['moonset']) ? $moon_times['moonset']->format('g:ia') : 'NONE';
         $label_font_size = 25;
     }
 

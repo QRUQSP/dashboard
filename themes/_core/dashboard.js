@@ -100,22 +100,22 @@ function db_resize() {
     s.innerHTML += "table.dbpanel { height: " + h + "px; }";
     for(var i in db_panels) {
         s.innerHTML += "table.dbpanel-" + i + " td { "
-            + "width: " + Math.round(w/db_panels[i].cols) + "px; "
-            + "height: " + Math.round(h/db_panels[i].rows) + "px; "
+            + "width: " + Math.round(w/db_panels[i].numcols) + "px; "
+            + "height: " + Math.round(h/db_panels[i].numrows) + "px; "
             + "}";
         s.innerHTML += "table.dbpanel-" + i + " td svg { "
-            + "width: " + Math.round(w/db_panels[i].cols) + "px; "
-            + "height: " + Math.round(h/db_panels[i].rows) + "px; "
+            + "width: " + Math.round(w/db_panels[i].numcols) + "px; "
+            + "height: " + Math.round(h/db_panels[i].numrows) + "px; "
             + "}";
-        for(var j = 2; j <= db_panels[i].cols; j++) {
-            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " .widget {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " svg {width: " + Math.round((w/db_panels[i].cols)*j) + "px;}";
+        for(var j = 2; j <= db_panels[i].numcols; j++) {
+            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " {width: " + Math.round((w/db_panels[i].numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " .widget {width: " + Math.round((w/db_panels[i].numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " svg {width: " + Math.round((w/db_panels[i].numcols)*j) + "px;}";
         }
-        for(var j = 2; j <= db_panels[i].rows; j++) {
-            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " .widget {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " svg {height: " + Math.round((h/db_panels[i].rows)*j) + "px;}";
+        for(var j = 2; j <= db_panels[i].numrows; j++) {
+            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " {height: " + Math.round((h/db_panels[i].numrows)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " .widget {height: " + Math.round((h/db_panels[i].numrows)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " svg {height: " + Math.round((h/db_panels[i].numrows)*j) + "px;}";
         }
     }
 }
