@@ -57,11 +57,11 @@ function qruqsp_dashboard_widgets_date2(&$ciniki, $tnid, $args) {
     //
     $widget['content'] .= '<svg viewBox="0 0 200 200">';
     $widget['content'] .= "<text x='100' y='54' width='180' height='40' font-size='65' fill='#ccc'>"
-        . "<tspan id='widget-{$widget['id']}-month' alignment-baseline='middle' text-anchor='middle'>"
+        . "<tspan id='widget-{$widget['id']}-month' dominant-baseline='middle' alignment-baseline='middle' text-anchor='middle'>"
         . $widget['data']['month']
         . "</tspan></text>";
     $widget['content'] .= "<text x='100' y='148' width='180' height='140' font-size='135' fill='#fff'>"
-        . "<tspan id='widget-{$widget['id']}-day' alignment-baseline='middle' text-anchor='middle'>"
+        . "<tspan id='widget-{$widget['id']}-day' dominant-baseline='middle' alignment-baseline='middle' text-anchor='middle'>"
         . $widget['data']['day']
         . "</tspan></text>";
     $widget['content'] .= '</svg>';
