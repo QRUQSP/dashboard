@@ -30,6 +30,14 @@ function qruqsp_dashboard_widgets_sunup1(&$ciniki, $tnid, $args) {
 
     $widget = $args['widget'];
 
+    $sun_font_size = 20;
+    $moon_font_size = 17;
+    $time_font_size = 35;
+    if( isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], ' Gecko/20') !== false ) {
+        $sun_font_size = 18;
+        $moon_font_size = 15;
+    }
+
     //
     // Load the tenant settings
     //
@@ -59,13 +67,19 @@ function qruqsp_dashboard_widgets_sunup1(&$ciniki, $tnid, $args) {
         $widget['data']['sunset'] = $sun_times['sunset']->format('H:i');
         $widget['data']['moonrise'] = isset($moon_times['moonrise']) ? $moon_times['moonrise']->format('H:i') : 'NONE';
         $widget['data']['moonset'] = isset($moon_times['moonset']) ? $moon_times['moonset']->format('H:i') : 'NONE';
-        $label_font_size = 35;
+        $time_font_size = 35;
+        if( isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], ' Gecko/20') !== false ) {
+            $time_font_size = 32;
+        }
     } else {
         $widget['data']['sunrise'] = $sun_times['sunrise']->format('g:ia');
         $widget['data']['sunset'] = $sun_times['sunset']->format('g:ia');
         $widget['data']['moonrise'] = isset($moon_times['moonrise']) ? $moon_times['moonrise']->format('g:ia') : 'NONE';
         $widget['data']['moonset'] = isset($moon_times['moonset']) ? $moon_times['moonset']->format('g:ia') : 'NONE';
-        $label_font_size = 25;
+        $time_font_size = 25;
+        if( isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], ' Gecko/20') !== false ) {
+            $time_font_size = 22;
+        }
     }
 
     if( isset($args['action']) && $args['action'] == 'update' ) {
@@ -77,30 +91,30 @@ function qruqsp_dashboard_widgets_sunup1(&$ciniki, $tnid, $args) {
     //
     $widget['content'] .= '<svg viewBox="0 0 200 200">';
     // Sunrise
-    $widget['content'] .= "<text x='50' y='45' width='90' height='20' font-size='20' fill='#ccc'>"
+    $widget['content'] .= "<text x='50' y='45' width='90' height='20' font-size='{$sun_font_size}' fill='#ccc'>"
         . "<tspan text-anchor='middle'>SUNRISE</tspan></text>";
-    $widget['content'] .= "<text x='50' y='82' width='90' height='20' font-size='{$label_font_size}' fill='#fff'>"
+    $widget['content'] .= "<text x='50' y='82' width='90' height='20' font-size='{$time_font_size}' fill='#fff'>"
         . "<tspan id='widget-{$widget['id']}-sunrise' text-anchor='middle'>"
         . $widget['data']['sunrise']
         . "</tspan></text>";
     // Sunset
-    $widget['content'] .= "<text x='150' y='45' width='90' height='20' font-size='20' fill='#ccc'>"
+    $widget['content'] .= "<text x='150' y='45' width='90' height='20' font-size='{$sun_font_size}' fill='#ccc'>"
         . "<tspan text-anchor='middle'>SUNSET</tspan></text>";
-    $widget['content'] .= "<text x='150' y='82' width='90' height='20' font-size='{$label_font_size}' fill='#fff'>"
+    $widget['content'] .= "<text x='150' y='82' width='90' height='20' font-size='{$time_font_size}' fill='#fff'>"
         . "<tspan id='widget-{$widget['id']}-sunset' text-anchor='middle'>"
         . $widget['data']['sunset']
         . "</tspan></text>";
     // Moonrise
-    $widget['content'] .= "<text x='50' y='130' width='100' height='20' font-size='17' fill='#ccc'>"
+    $widget['content'] .= "<text x='50' y='130' width='100' height='20' font-size='{$moon_font_size}' fill='#ccc'>"
         . "<tspan text-anchor='middle'>MOONRISE</tspan></text>";
-    $widget['content'] .= "<text x='50' y='167' width='100' height='20' font-size='{$label_font_size}' fill='#fff'>"
+    $widget['content'] .= "<text x='50' y='167' width='100' height='20' font-size='{$time_font_size}' fill='#fff'>"
         . "<tspan id='widget-{$widget['id']}-moonrise' text-anchor='middle'>"
         . $widget['data']['moonrise']
         . "</tspan></text>";
     // Moonset
-    $widget['content'] .= "<text x='150' y='130' width='100' height='20' font-size='17' fill='#ccc'>"
+    $widget['content'] .= "<text x='150' y='130' width='100' height='20' font-size='{$moon_font_size}' fill='#ccc'>"
         . "<tspan text-anchor='middle'>MOONSET</tspan></text>";
-    $widget['content'] .= "<text x='150' y='167' width='100' height='20' font-size='{$label_font_size}' fill='#fff'>"
+    $widget['content'] .= "<text x='150' y='167' width='100' height='20' font-size='{$time_font_size}' fill='#fff'>"
         . "<tspan id='widget-{$widget['id']}-moonset' text-anchor='middle'>"
         . $widget['data']['moonset']
         . "</tspan></text>";

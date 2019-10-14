@@ -30,6 +30,13 @@ function qruqsp_dashboard_widgets_date1(&$ciniki, $tnid, $args) {
 
     $widget = $args['widget'];
 
+    $date_font_size = 54;
+    $time_font_size = 80;
+    if( isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], ' Gecko/20') !== false ) {
+        $date_font_size = 47;
+        $time_font_size = 65;
+    }
+
     //
     // Load the tenant settings
     //
@@ -60,11 +67,11 @@ function qruqsp_dashboard_widgets_date1(&$ciniki, $tnid, $args) {
     // Setup the svg
     //
     $widget['content'] .= '<svg viewBox="0 0 200 150">';
-    $widget['content'] .= "<text x='100' y='48' width='180' height='74' font-size='54' fill='#ccc'>"
+    $widget['content'] .= "<text x='100' y='48' width='180' height='74' font-size='{$date_font_size}' fill='#ccc'>"
         . "<tspan id='widget-{$widget['id']}-date' dominant-baseline='middle' alignment-baseline='middle' text-anchor='middle'>"
         . $widget['data']['date']
         . "</tspan></text>";
-    $widget['content'] .= "<text x='100' y='114' width='180' height='74' font-size='80' fill='#fff'>"
+    $widget['content'] .= "<text x='100' y='114' width='180' height='74' font-size='{$time_font_size}' fill='#fff'>"
         . "<tspan id='widget-{$widget['id']}-time' dominant-baseline='middle' alignment-baseline='middle' text-anchor='middle'>"
         . $widget['data']['time']
         . "</tspan></text>";
