@@ -48,6 +48,15 @@ function qruqsp_dashboard_widgets_sunup1(&$ciniki, $tnid, $args) {
     }
     $intl_timezone = $rc['settings']['intl-default-timezone'];
     
+    //
+    // Add the current GPS coordinates to the response
+    //
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'tenants', 'hooks', 'tenantGPSCoords');
+    $rc = ciniki_tenants_hooks_tenantGPSCoords($ciniki, $tnid, array());
+    if( $rc['stat'] != 'ok' ) {
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.i2c.19', 'msg'=>'Unable to get GPS Coordinates', 'err'=>$rc['err']));
+    }
+    $gps = $rc;
 
     //
     // Load the rise/set calculator for sun and moon
@@ -59,7 +68,7 @@ function qruqsp_dashboard_widgets_sunup1(&$ciniki, $tnid, $args) {
     //
     $dt = new DateTime('now', new DateTimezone($intl_timezone));
 
-    $sc = new AurorasLive\SunCalc($dt, 44.476261, -80.061761);
+    $sc = new AurorasLive\SunCalc($dt, $gps['latitude'], $gps['longitude']);
     $sun_times = $sc->getSunTimes();
     $moon_times = $sc->getMoonTimes(false);
     if( isset($widget['settings']['24hour']) && $widget['settings']['24hour'] == 'yes' ) {
