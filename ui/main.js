@@ -17,7 +17,7 @@ function qruqsp_dashboard_main() {
         'dashboards':{'label':'Dashboards', 'type':'simplegrid', 'num_cols':2,
             'cellClasses':['', 'alignright'],
             'noData':'No dashboard',
-            'addTxt':'Add Dashboards',
+            'addTxt':'Add Dashboard',
             'addFn':'M.qruqsp_dashboard_main.dashboard.open(\'M.qruqsp_dashboard_main.menu.open();\',0,null);'
             },
     }
