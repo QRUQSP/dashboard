@@ -43,7 +43,7 @@ function qruqsp_dashboard_cellUpdate(&$ciniki) {
     //
     // Load the current cell
     //
-    $strsql = "SELECT id, row, col, widget_ref, settings "
+    $strsql = "SELECT id, row, col, widget_ref, settings, cache "
         . "FROM qruqsp_dashboard_cells "
         . "WHERE id = '" . ciniki_core_dbQuote($ciniki, $args['cell_id']) . "' "
         . "AND tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
@@ -91,6 +91,8 @@ function qruqsp_dashboard_cellUpdate(&$ciniki) {
         }
     }
     $args['settings'] = serialize($settings); 
+
+    // $args['cache'] = '';
 
     //
     // Start transaction

@@ -114,7 +114,8 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
         . "cells.rowspan, "
         . "cells.colspan, "
         . "cells.widget_ref, "
-        . "cells.settings AS cell_settings "
+        . "cells.settings AS cell_settings, "
+        . "cells.cache AS cell_cache "
         . "FROM qruqsp_dashboard_panels AS panels "
         . "LEFT JOIN qruqsp_dashboard_cells AS cells ON ("
             . "panels.id = cells.panel_id "
@@ -129,7 +130,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
         . "";
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.dashboard', array(
         array('container'=>'panels', 'fname'=>'id', 'fields'=>array('id', 'title', 'sequence', 'numrows', 'numcols', 'settings')),
-        array('container'=>'cells', 'fname'=>'cell_id', 'fields'=>array('id'=>'cell_id', 'row', 'col', 'rowspan', 'colspan', 'widget_ref', 'settings'=>'cell_settings')),
+        array('container'=>'cells', 'fname'=>'cell_id', 'fields'=>array('id'=>'cell_id', 'row', 'col', 'rowspan', 'colspan', 'widget_ref', 'settings'=>'cell_settings', 'cache'=>'cell_cache')),
         ));
     if( $rc['stat'] != 'ok' ) {
         return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.dashboard.8', 'msg'=>'Unable to load dashboard panels', 'err'=>$rc['err']));
@@ -202,6 +203,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
                             'css' => '',
                             'js' => '',
                             'data' => array(),
+                            'cache' => '',
                             );
                     }
                     if( isset($rc['cell']) ) {
@@ -365,7 +367,7 @@ function qruqsp_dashboard_generate(&$ciniki, $tnid, $args) {
                 //
                 // Add javascript
                 //
-                if( isset($cell['js']) ) {
+                if( isset($cell['js']) && is_array($cell['js']) ) {
                     foreach($cell['js'] as $name => $func) {
                         $js .= "db_cells[{$cell['id']}]['{$name}'] = " . $func;
                         if( $name == 'update' ) { 

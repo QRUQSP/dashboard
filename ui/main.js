@@ -258,7 +258,26 @@ function qruqsp_dashboard_main() {
             }
             var p = M.qruqsp_dashboard_main.panel;
             p.data = rsp;
+            console.log(rsp);
             this.dashboard_id = p.data.panel.dashboard_id;
+            var css = '';
+            if( rsp.panel != null && rsp.panel.cells != null ) {
+                for(var i in rsp.panel.cells) {
+                    if( rsp.panel.cells[i].css != '' ) {
+                        css += rsp.panel.cells[i].css;
+                    }
+                }
+                if( css != '' ) {
+                    var s = M.gE(p.panelUID + '_cells_css');
+                    if( s == null ) {
+                        s = document.createElement('style');
+                        s.setAttribute('id', p.panelUID + '_cells_css');
+                        document.head.appendChild(s);
+                    }
+                    s.innerHTML = css;
+                }
+            }
+
             p.refresh();
             p.show(cb);
             p.resizeCells();
@@ -300,38 +319,49 @@ function qruqsp_dashboard_main() {
             + "box-sizing: border-box; "
             + "background: #000;"
             + "width: " + w + "px; "
-            + "}; "
+            + "} "
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " div, "
+            + "table.dbpanel-" + this.panel_id + " span, "
+            + "table.dbpanel-" + this.panel_id + " table, "
+            + "table.dbpanel-" + this.panel_id + " tbody, "
+            + "table.dbpanel-" + this.panel_id + " tr, "
+            + "table.dbpanel-" + this.panel_id + " th, "
+            + "table.dbpanel-" + this.panel_id + " td, "
+            + "table.dbpanel-" + this.panel_id + " div {"
+            + "box-sizing: border-box; "
+            + "}; ";
         s.innerHTML += "table.dbpanel { width: " + w + "px;}";
-        s.innerHTML += "table.dbpanel-" + this.panel_id + " td.over { "
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " > tbody > tr > td.over { "
             + "background: #ccc; "
             + "}";
-        s.innerHTML += "table.dbpanel-" + this.panel_id + " td { "
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " > tbody > tr > td { "
             + "width: " + Math.round(w/this.data.panel.numcols) + "px; "
             + "height: " + Math.round(h/this.data.panel.numrows) + "px; "
             + "border: 1px solid yellow;"
+            + "overflow: hidden;"
             + "}";
-        s.innerHTML += "table.dbpanel-" + this.panel_id + " td svg, "
-            + "table.dbpanel-" + this.panel_id + " td div.empty { "
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " > tbody > tr > td svg, "
+            + "table.dbpanel-" + this.panel_id + " > tbody > tr > td div.empty { "
                 + "width: " + Math.round(w/this.data.panel.numcols) + "px; "
                 + "height: " + Math.round(h/this.data.panel.numrows) + "px; "
             + "}";
         for(var j = 2; j <= this.data.panel.numcols; j++) {
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " {width: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " .widget {width: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.w" + j + " svg {width: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " > tbody > tr > td.w" + j + " {width: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " > tbody > tr > td.w" + j + " .widget {width: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " > tbody > tr > td.w" + j + " svg {width: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
         }
         for(var j = 2; j <= this.data.panel.numrows; j++) {
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " {height: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " .widget {height: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + this.panel_id + " td.h" + j + " svg {height: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " > tbody > tr > td.h" + j + " {height: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " > tbody > tr > td.h" + j + " .widget {height: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + this.panel_id + " > tbody > tr > td.h" + j + " svg {height: " + Math.round((w/this.data.panel.numcols)*j) + "px;}";
         }
-        s.innerHTML += "table.dbpanel-" + this.panel_id + " tr.spacing td {"
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " > tbody > tr.spacing > td {"
             + "height: 1px !important; "
             + "border-left: 0px solid #000; "
             + "border-top: 0px solid #000; "
             + "border-right: 0px solid #000; "
             + "} "
-        s.innerHTML += "table.dbpanel-" + this.panel_id + " tr.spacing td:first-child, "
+        s.innerHTML += "table.dbpanel-" + this.panel_id + " > tbody > tr.spacing > td:first-child, "
             + "table.dbpanel-" + this.panel_id + " tr td.spacing {"
             + "width: 1px !important; "
             + "border-left: 0px solid #000; "
@@ -459,7 +489,7 @@ function qruqsp_dashboard_main() {
     //
     // The panel to edit cell
     //
-    this.cell = new M.panel('Widget', 'qruqsp_dashboard_main', 'cell', 'mc', 'medium', 'sectioned', 'qruqsp.dashboard.main.cell');
+    this.cell = new M.panel('Widget', 'qruqsp_dashboard_main', 'cell', 'mc', 'large', 'sectioned', 'qruqsp.dashboard.main.cell');
     this.cell.data = null;
     this.cell.widgets = null;
     this.cell.cell_id = 0;

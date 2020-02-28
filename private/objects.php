@@ -62,6 +62,7 @@ function qruqsp_dashboard_objects(&$ciniki) {
             'colspan' => array('name'=>'Column Span'),
             'widget_ref' => array('name'=>'Widget Reference'),
             'settings' => array('name'=>'Settings', 'default'=>''),
+            'cache' => array('name'=>'Cache Data', 'default'=>''),
             ),
         'history_table' => 'qruqsp_dashboard_history',
         );

@@ -3,12 +3,12 @@ var resetTimer = null;
 var slideshowTimer = null;
 var curPanel = null;
 function db_ge(p,i) {
-    return document.getElementById('widget-' + p.id + '-' + i);
+    return document.getElementById('widget-' + p.id + (i!=''?'-':'') + i);
 }
 function db_setInnerHtml(p,i,h) {
     var e = db_ge(p,i);
     if( e != null ) {
-        e.textContent = h;
+        e.textContent = '' + h;
     }
 }
 function db_update() {
@@ -99,23 +99,23 @@ function db_resize() {
     s.innerHTML += "table.dbpanel { width: " + w + "px; }";
     s.innerHTML += "table.dbpanel { height: " + h + "px; }";
     for(var i in db_panels) {
-        s.innerHTML += "table.dbpanel-" + i + " td { "
+        s.innerHTML += "table.dbpanel-" + i + " > tbody > tr > td { "
             + "width: " + Math.round(w/db_panels[i].numcols) + "px; "
             + "height: " + Math.round(h/db_panels[i].numrows) + "px; "
             + "}";
-        s.innerHTML += "table.dbpanel-" + i + " td svg { "
+        s.innerHTML += "table.dbpanel-" + i + " > tbody > tr > td svg { "
             + "width: " + Math.round(w/db_panels[i].numcols) + "px; "
             + "height: " + Math.round(h/db_panels[i].numrows) + "px; "
             + "}";
         for(var j = 2; j <= db_panels[i].numcols; j++) {
-            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " {width: " + Math.round((w/db_panels[i].numcols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " .widget {width: " + Math.round((w/db_panels[i].numcols)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + i + " td.w" + j + " svg {width: " + Math.round((w/db_panels[i].numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " > tbody > tr > td.w" + j + " {width: " + Math.round((w/db_panels[i].numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " > tbody > tr > td.w" + j + " .widget {width: " + Math.round((w/db_panels[i].numcols)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " > tbody > tr > td.w" + j + " svg {width: " + Math.round((w/db_panels[i].numcols)*j) + "px;}";
         }
         for(var j = 2; j <= db_panels[i].numrows; j++) {
-            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " {height: " + Math.round((h/db_panels[i].numrows)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " .widget {height: " + Math.round((h/db_panels[i].numrows)*j) + "px;}";
-            s.innerHTML += "table.dbpanel-" + i + " td.h" + j + " svg {height: " + Math.round((h/db_panels[i].numrows)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " > tbody > tr > td.h" + j + " {height: " + Math.round((h/db_panels[i].numrows)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " > tbody > tr > td.h" + j + " .widget {height: " + Math.round((h/db_panels[i].numrows)*j) + "px;}";
+            s.innerHTML += "table.dbpanel-" + i + " > tbody > tr > td.h" + j + " svg {height: " + Math.round((h/db_panels[i].numrows)*j) + "px;}";
         }
     }
 }
@@ -145,7 +145,7 @@ function db_init() {
     if( db_settings['slideshow-mode'] == null || db_settings['slideshow-mode'] != 'auto' 
         || db_settings['slideshow-delay-seconds'] == null || db_settings['slideshow-delay-seconds'] > 15 
         ) {
-        refreshTimer = setTimeout(db_update, 3005);
+        refreshTimer = setTimeout(db_update, 53005);
     }
 }
 window.onload = db_init();

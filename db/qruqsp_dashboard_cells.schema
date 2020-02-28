@@ -20,6 +20,8 @@
 # settings:                 The additional settings for the widget, stored as serialized PHP array which can be converted
 #                           to JSON for the javascript.
 #
+# cache:                    The data cache for this widget. Added originally to store calendar .ics data for next 7 days. This will typically be a PHP serialized array.
+#
 # date_added:               The UTC date and time the record was added.
 # last_updated:             The UTC date and time the record was last update.
 #
@@ -35,6 +37,7 @@ create table qruqsp_dashboard_cells (
     colspan int not null,
     widget_ref varchar(250) not null,
     settings text not null,
+    cache text not null,
 
     date_added datetime not null,
     last_updated datetime not null,
@@ -42,4 +45,4 @@ create table qruqsp_dashboard_cells (
     unique index (uuid),
     index (panel_id),
     index sync (tnid, uuid, last_updated)
-) ENGINE='InnoDB', COMMENT='v1.01';
+) ENGINE='InnoDB', COMMENT='v1.02';

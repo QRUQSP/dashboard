@@ -74,15 +74,16 @@ table.dbpanel {
     height: 100%;
     border-collapse: collapse;
 }
-table.dbpanel tr.spacing td {
+table.dbpanel > tbody > tr.spacing > td {
     height: 1px !important;
 }
-table.dbpanel tr td.spacing {
+table.dbpanel > tbody > tr td.spacing {
     width: 1px !important;
 }
-table.dbpanel td {
+table.dbpanel > tbody > tr > td {
     vertical-align: middle;
+    overflow: hidden;
 }
-table.dbpanel td svg {
+table.dbpanel > tbody > tr > td svg {
     vertical-align: middle;
 }

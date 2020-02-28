@@ -151,6 +151,14 @@ if( isset($args['path'][0]) && $args['path'][0] == 'dashboard' ) {
 }
 
 //
+// Setup the session
+//
+$ciniki['session'] = array(
+    'change_log_id' => 'dashboard.' . date('Ymd.His'),
+    'user' => array('id'=>'-5'),
+    );
+
+//
 // Generate the dashboard
 //
 ciniki_core_loadMethod($ciniki, 'qruqsp', 'dashboard', 'private', 'generate');
