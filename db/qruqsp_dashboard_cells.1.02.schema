@@ -1,5 +1,0 @@
-#
-# Add column for storing the cached data for the widget
-#
-ALTER TABLE qruqsp_dashboard_cells ADD COLUMN cache text not null AFTER settings;
-ALTER TABLE qruqsp_dashboard_cells COMMENT='v1.02';
