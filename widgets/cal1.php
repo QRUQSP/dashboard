@@ -179,7 +179,7 @@ function qruqsp_dashboard_widgets_cal1(&$ciniki, $tnid, $args) {
     $widget['css'] = ''
         . "#widget-{$widget['id']} {"
             . "padding: 0.25em; "
-            . "font-size: {$widget['settings']['fontsize']}px; "
+            . "font-size: {$widget['settings']['font-size']}px; "
             . "font-family: sans-serif;"
             . "color: #ddd;"
         . "}\n"

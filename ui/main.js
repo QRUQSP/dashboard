@@ -258,7 +258,6 @@ function qruqsp_dashboard_main() {
             }
             var p = M.qruqsp_dashboard_main.panel;
             p.data = rsp;
-            console.log(rsp);
             this.dashboard_id = p.data.panel.dashboard_id;
             var css = '';
             if( rsp.panel != null && rsp.panel.cells != null ) {

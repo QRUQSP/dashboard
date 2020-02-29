@@ -77,7 +77,7 @@ function qruqsp_dashboard_hooks_dashboardWidgets(&$ciniki, $tnid, $args) {
                     'label' => 'Line Wrap',
                     'type' => 'toggle',
                     'toggles' => array('wrap'=>'Yes', 'nowrap'=>'No'), 
-                    'default' => 'yes',
+                    'default' => 'wrap',
                 ),
 /*                'dir' => array(
                     'label' => 'Multi-Day Direction',
@@ -85,7 +85,7 @@ function qruqsp_dashboard_hooks_dashboardWidgets(&$ciniki, $tnid, $args) {
                     'toggles' => array('v'=>'Vertical', 'h'=>'Horizontal'), 
                     'default' => 'v',
                 ), */
-                'fontsize' => array(
+                'font-size' => array(
                     'label' => 'Font Size',
                     'type' => 'toggle',
                     'toggles' => array('8'=>'8', '10'=>'10', '12'=>'12', '14'=>'14', '16'=>'16', '18'=>'18', '20'=>'20', '22'=>'22'), 
@@ -118,7 +118,7 @@ function qruqsp_dashboard_hooks_dashboardWidgets(&$ciniki, $tnid, $args) {
             'label' => "Refresh Time",
             'type' => 'select',
             'options' => array('5'=>'5 Min', '15'=>'15 Min', '30'=>'30 Min', '60'=>'1 Hour', '300'=>'5 Hours', '720'=>'12 Hours', '1440'=>'24 Hours'), 
-            'default' => '60',
+            'default' => '1440',
             );
         $widgets['qruqsp.dashboard.cal1']['options']["color{$i}"] = array(
             'label' => "Color",
