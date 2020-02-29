@@ -92,7 +92,10 @@ function qruqsp_dashboard_cellUpdate(&$ciniki) {
     }
     $args['settings'] = serialize($settings); 
 
-    // $args['cache'] = '';
+    //
+    // Clear the cache whenever settings are changed so the calendar files are reloaded
+    //
+    $args['cache'] = '';
 
     //
     // Start transaction
