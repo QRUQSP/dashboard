@@ -1,0 +1,5 @@
+#
+# Add cache field for storing widget cache data
+#
+ALTER TABLE qruqsp_dashboard_cells ADD COLUMN cache TEXT NOT NULL AFTER settings;
+ALTER TABLE qruqsp_dashboard_cells COMMENT='v1.02';
