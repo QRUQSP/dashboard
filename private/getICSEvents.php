@@ -17,6 +17,10 @@ function qruqsp_dashboard_getICSEvents(&$ciniki, $tnid, $file, $start_dt, $end_d
     // Load the file
     //
     $lines = file($file, FILE_IGNORE_NEW_LINES);
+
+    // Save file for testing to /tmp for debugging
+    // file_put_contents('/tmp/' . preg_replace("/[^a-zA-Z]/", '', $file), join("\n", $lines));
+
     $event = null;
     $events = array();
     $repeats = array();
@@ -43,7 +47,7 @@ function qruqsp_dashboard_getICSEvents(&$ciniki, $tnid, $file, $start_dt, $end_d
                     $dt = new DateTime($m[1], new DateTimezone($tz));
                 } elseif( preg_match("/UNTIL=([0-9]+)/", $event['repeat'], $m) ) {
                     $dt = new DateTime($m[1], new DateTimezone($tz));
-                } elseif( preg_match("/FREQ=WEEKLY;COUNT=([0-9]+)/", $event['repeat'], $m) ) {
+                } elseif( preg_match("/FREQ=WEEKLY;.*COUNT=([0-9]+)/", $event['repeat'], $m) ) {
                     $dt = clone $event['end'];
                     $dt->add(new DateInterval('P' . $m[1] . 'W'));
                 }

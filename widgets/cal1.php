@@ -146,13 +146,10 @@ function qruqsp_dashboard_widgets_cal1(&$ciniki, $tnid, $args) {
     $table .= ($dir == 'h' ? '</tr>' : '');
     $table .= "</table>";
 
-
     //
     // Update the cache
     //
-    error_log('Check cache');
     if( !isset($widget['cache']) || $widget['cache'] != $newcache ) {
-        error_log('Update cache for widget: ' . $widget['id']);
         ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'objectUpdate');
         $rc = ciniki_core_objectUpdate($ciniki, $tnid, 'qruqsp.dashboard.cell', $widget['id'], array(
             'cache' => $newcache,
