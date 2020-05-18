@@ -205,15 +205,15 @@ function qruqsp_dashboard_main() {
         }
     }
     this.dashboard.remove = function() {
-        if( confirm('Are you sure you want to remove dashboard?') ) {
-            M.api.getJSONCb('qruqsp.dashboard.dashboardDelete', {'tnid':M.curTenantID, 'dashboard_id':this.dashboard_id}, function(rsp) {
+        M.confirm('Are you sure you want to remove dashboard?',null,function() {
+            M.api.getJSONCb('qruqsp.dashboard.dashboardDelete', {'tnid':M.curTenantID, 'dashboard_id':M.qruqsp_dashboard_main.dashboard.dashboard_id}, function(rsp) {
                 if( rsp.stat != 'ok' ) {
                     M.api.err(rsp);
                     return false;
                 }
                 M.qruqsp_dashboard_main.dashboard.close();
             });
-        }
+        });
     }
     this.dashboard.nextButtonFn = function() {
         if( this.nplist != null && this.nplist.indexOf('' + this.dashboard_id) < (this.nplist.length - 1) ) {
@@ -458,15 +458,15 @@ function qruqsp_dashboard_main() {
         }
     }
     this.paneledit.remove = function() {
-        if( confirm('Are you sure you want to remove panel?') ) {
-            M.api.getJSONCb('qruqsp.dashboard.panelDelete', {'tnid':M.curTenantID, 'panel_id':this.panel_id}, function(rsp) {
+        M.confirm('Are you sure you want to remove panel?',null,function() {
+            M.api.getJSONCb('qruqsp.dashboard.panelDelete', {'tnid':M.curTenantID, 'panel_id':M.qruqsp_dashboard_main.paneledit.panel_id}, function(rsp) {
                 if( rsp.stat != 'ok' ) {
                     M.api.err(rsp);
                     return false;
                 }
                 M.qruqsp_dashboard_main.paneledit.close();
             });
-        }
+        });
     }
     this.paneledit.nextButtonFn = function() {
         if( this.nplist != null && this.nplist.indexOf('' + this.panel_id) < (this.nplist.length - 1) ) {
@@ -616,15 +616,15 @@ function qruqsp_dashboard_main() {
         }
     }
     this.cell.remove = function() {
-        if( confirm('Are you sure you want to remove the widget?') ) {
-            M.api.getJSONCb('qruqsp.dashboard.cellDelete', {'tnid':M.curTenantID, 'cell_id':this.cell_id}, function(rsp) {
+        M.confirm('Are you sure you want to remove the widget?',null,function() {
+            M.api.getJSONCb('qruqsp.dashboard.cellDelete', {'tnid':M.curTenantID, 'cell_id':M.qruqsp_dashboard_main.cell.cell_id}, function(rsp) {
                 if( rsp.stat != 'ok' ) {
                     M.api.err(rsp);
                     return false;
                 }
                 M.qruqsp_dashboard_main.cell.close();
             });
-        }
+        });
     }
     this.cell.nextButtonFn = function() {
         if( this.nplist != null && this.nplist.indexOf('' + this.cell_id) < (this.nplist.length - 1) ) {
@@ -660,7 +660,7 @@ function qruqsp_dashboard_main() {
         //
         var ac = M.createContainer(ap, 'qruqsp_dashboard_main', 'yes');
         if( ac == null ) {
-            alert('App Error');
+            M.alert('App Error');
             return false;
         }
         
