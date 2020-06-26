@@ -19,7 +19,7 @@ function qruqsp_dashboard_getICSEvents(&$ciniki, $tnid, $file, $start_dt, $end_d
     $lines = file($file, FILE_IGNORE_NEW_LINES);
 
     // Save file for testing to /tmp for debugging
-    file_put_contents('/tmp/' . preg_replace("/[^a-zA-Z]/", '', $file), join("\n", $lines));
+    // file_put_contents('/tmp/' . preg_replace("/[^a-zA-Z]/", '', $file), join("\n", $lines));
 
     $event = null;
     $events = array();
