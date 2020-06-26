@@ -19,7 +19,7 @@ function qruqsp_dashboard_getICSEvents(&$ciniki, $tnid, $file, $start_dt, $end_d
     $lines = file($file, FILE_IGNORE_NEW_LINES);
 
     // Save file for testing to /tmp for debugging
-    // file_put_contents('/tmp/' . preg_replace("/[^a-zA-Z]/", '', $file), join("\n", $lines));
+    file_put_contents('/tmp/' . preg_replace("/[^a-zA-Z]/", '', $file), join("\n", $lines));
 
     $event = null;
     $events = array();
@@ -56,13 +56,25 @@ function qruqsp_dashboard_getICSEvents(&$ciniki, $tnid, $file, $start_dt, $end_d
                         continue;
                     }
                 }
-                if( $dt == null || $dt > $start_dt ) {
+                //
+                // If end date is specified and is the same day as start of event
+                // then add to list of events.
+                // Otherwise add to repeats
+                //
+                if( $dt != null && $dt->format('Y-m-d') == $event['start']->format('Y-m-d') ) { 
+                    $events[] = $event;
+                }
+                elseif( $dt == null || $dt > $start_dt ) {
                     $repeats[] = $event;
                 }
             } else {
                 //
                 // If the event is between the range of dates we want, then add event
                 //
+                if( !isset($event['end']) ) {
+                    $event['end'] = clone $event['start'];
+                    $event['end']->add(new DateInterval('PT1H'));
+                }
                 if( ($event['start'] >= $start_dt && $event['start'] <= $end_dt) 
                     || ($event['end'] >= $start_dt && $event['end'] <= $end_dt) 
                     ) {
@@ -127,6 +139,14 @@ function qruqsp_dashboard_getICSEvents(&$ciniki, $tnid, $file, $start_dt, $end_d
         } 
         elseif( preg_match("/FREQ=WEEKLY/", $repeat['repeat']) ) {
             $repeat['interval'] = new DateInterval('P1W');
+        }
+        elseif( preg_match("/FREQ=DAILY/", $repeat['repeat']) ) {
+            $repeat['interval'] = new DateInterval('P1D');
+            if( preg_match("/UNTIL=([0-9]+T[0-9]+Z)/", $repeat['repeat'], $m) ) {
+                $dt = new DateTime($m[1], new DateTimezone('UTC'));
+                $dt->setTimezone(new DateTimezone($tz));
+                $event['end'] = $dt;
+            }
         }
         elseif( preg_match("/FREQ=MONTHLY;BYMONTHDAY=([0-9]+)/", $repeat['repeat'], $m) ) {
             $repeat['interval'] = new DateInterval('P1M');
