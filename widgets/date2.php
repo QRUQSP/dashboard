@@ -62,16 +62,34 @@ function qruqsp_dashboard_widgets_date2(&$ciniki, $tnid, $args) {
     //
     // Setup the svg
     //
-    $widget['content'] .= '<svg viewBox="0 0 200 200">';
-    $widget['content'] .= "<text x='100' y='54' width='180' height='40' font-size='{$month_font_size}' fill='#ccc'>"
-        . "<tspan id='widget-{$widget['id']}-month' dominant-baseline='middle' alignment-baseline='middle' text-anchor='middle'>"
-        . $widget['data']['month']
-        . "</tspan></text>";
-    $widget['content'] .= "<text x='100' y='148' width='180' height='140' font-size='{$day_font_size}' fill='#fff'>"
-        . "<tspan id='widget-{$widget['id']}-day' dominant-baseline='middle' alignment-baseline='middle' text-anchor='middle'>"
-        . $widget['data']['day']
-        . "</tspan></text>";
-    $widget['content'] .= '</svg>';
+    if( ($widget['colspan']/$widget['rowspan']) >= 2 ) {
+        $day_font_size = 110;
+        if( isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], ' Gecko/20') !== false ) {
+            $day_font_size = 105;
+        }
+        $widget['content'] .= '<svg viewBox="0 0 300 100">';
+        $widget['content'] .= "<text x='90' y='72' width='150' height='95' font-size='{$month_font_size}' fill='#ccc'>"
+            . "<tspan id='widget-{$widget['id']}-month' dominant-baseline='middle' alignment-baseline='middle' text-anchor='middle'>"
+            . $widget['data']['month']
+            . "</tspan></text>";
+        $widget['content'] .= "<text x='215' y='61' width='120' height='95' font-size='{$day_font_size}' fill='#fff'>"
+            . "<tspan id='widget-{$widget['id']}-day' dominant-baseline='middle' alignment-baseline='middle' text-anchor='middle'>"
+            . '1' . $widget['data']['day']
+            . "</tspan></text>";
+        $widget['content'] .= '</svg>';
+
+    } else {
+        $widget['content'] .= '<svg viewBox="0 0 200 200">';
+        $widget['content'] .= "<text x='100' y='54' width='180' height='40' font-size='{$month_font_size}' fill='#ccc'>"
+            . "<tspan id='widget-{$widget['id']}-month' dominant-baseline='middle' alignment-baseline='middle' text-anchor='middle'>"
+            . $widget['data']['month']
+            . "</tspan></text>";
+        $widget['content'] .= "<text x='100' y='148' width='180' height='140' font-size='{$day_font_size}' fill='#fff'>"
+            . "<tspan id='widget-{$widget['id']}-day' dominant-baseline='middle' alignment-baseline='middle' text-anchor='middle'>"
+            . $widget['data']['day']
+            . "</tspan></text>";
+        $widget['content'] .= '</svg>';
+    }
 
     //
     // Prepare update JS
