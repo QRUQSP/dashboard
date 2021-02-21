@@ -45,6 +45,24 @@ function qruqsp_dashboard_hooks_dashboardWidgets(&$ciniki, $tnid, $args) {
                 ),
             ),
         ),
+        'qruqsp.dashboard.date4' => array(
+            'name' => 'Date Banner',
+            'category' => 'Misc',
+            'options' => array(
+                'weekday' => array(
+                    'label' => 'Include Day of Week', 
+                    'type' => 'toggle',
+                    'default' => 'no',
+                    'toggles' => array('no'=>'No', 'yes'=>'Yes'),
+                ),
+                'fullnames' => array(
+                    'label' => 'Full Names', 
+                    'type' => 'toggle',
+                    'default' => 'no',
+                    'toggles' => array('no'=>'No', 'yes'=>'Yes'),
+                ),
+            ),
+        ),
         'qruqsp.dashboard.sunup1' => array(
             'name' => 'Sun/Moon Rise & Set Times',
             'category' => 'Misc',

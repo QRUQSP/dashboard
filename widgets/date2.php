@@ -74,7 +74,7 @@ function qruqsp_dashboard_widgets_date2(&$ciniki, $tnid, $args) {
             . "</tspan></text>";
         $widget['content'] .= "<text x='215' y='61' width='120' height='95' font-size='{$day_font_size}' fill='#fff'>"
             . "<tspan id='widget-{$widget['id']}-day' dominant-baseline='middle' alignment-baseline='middle' text-anchor='middle'>"
-            . '1' . $widget['data']['day']
+            . $widget['data']['day']
             . "</tspan></text>";
         $widget['content'] .= '</svg>';
 
