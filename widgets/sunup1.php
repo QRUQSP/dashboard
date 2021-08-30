@@ -131,6 +131,43 @@ function qruqsp_dashboard_widgets_sunup1(&$ciniki, $tnid, $args) {
         // Sunset
         $widget['content'] .= '</svg>';
 
+    } elseif( ($widget['colspan']/$widget['rowspan']) > 12 ) {
+        // Really wide
+        $sun_font_size = 15;
+        $time_font_size = 20;
+        $moon_font_size = 15;
+        $widget['content'] .= '<svg viewBox="0 0 800 50">';
+        // Sunrise
+        $widget['content'] .= "<text x='60' y='35' width='100' height='50' font-size='{$sun_font_size}' fill='#ccc'>"
+            . "<tspan text-anchor='middle'>SUNRISE</tspan></text>";
+        $widget['content'] .= "<text x='140' y='35' width='100' height='50' font-size='{$time_font_size}' fill='#fff'>"
+            . "<tspan id='widget-{$widget['id']}-sunrise' text-anchor='middle'>"
+            . $widget['data']['sunrise']
+            . "</tspan></text>";
+        // Sunset
+        $widget['content'] .= "<text x='260' y='35' width='100' height='50' font-size='{$sun_font_size}' fill='#ccc'>"
+            . "<tspan text-anchor='middle'>SUNSET</tspan></text>";
+        $widget['content'] .= "<text x='340' y='35' width='100' height='50' font-size='{$time_font_size}' fill='#fff'>"
+            . "<tspan id='widget-{$widget['id']}-sunset' text-anchor='middle'>"
+            . $widget['data']['sunset']
+            . "</tspan></text>";
+        // Moonrise
+        $widget['content'] .= "<text x='450' y='35' width='100' height='50' font-size='{$moon_font_size}' fill='#ccc'>"
+            . "<tspan text-anchor='middle'>MOONRISE</tspan></text>";
+        $widget['content'] .= "<text x='540' y='35' width='100' height='50' font-size='{$time_font_size}' fill='#fff'>"
+            . "<tspan id='widget-{$widget['id']}-moonrise' text-anchor='middle'>"
+            . $widget['data']['moonrise']
+            . "</tspan></text>";
+        // Moonset
+        $widget['content'] .= "<text x='660' y='35' width='100' height='50' font-size='{$moon_font_size}' fill='#ccc'>"
+            . "<tspan text-anchor='middle'>MOONSET</tspan></text>";
+        $widget['content'] .= "<text x='740' y='35' width='100' height='50' font-size='{$time_font_size}' fill='#fff'>"
+            . "<tspan id='widget-{$widget['id']}-moonset' text-anchor='middle'>"
+            . $widget['data']['moonset']
+            . "</tspan></text>";
+        // Sunset
+        $widget['content'] .= '</svg>';
+
     } else {
         $widget['content'] .= '<svg viewBox="0 0 200 200">';
         // Sunrise
