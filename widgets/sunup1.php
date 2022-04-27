@@ -131,7 +131,7 @@ function qruqsp_dashboard_widgets_sunup1(&$ciniki, $tnid, $args) {
         // Sunset
         $widget['content'] .= '</svg>';
 
-    } elseif( ($widget['colspan']/$widget['rowspan']) > 12 ) {
+    } elseif( ($widget['colspan']/$widget['rowspan']) > 11 ) {
         // Really wide
         $sun_font_size = 15;
         $time_font_size = 20;
